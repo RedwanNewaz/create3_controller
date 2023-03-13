@@ -23,7 +23,7 @@ JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEst
     ekf_odom_pub_ = this->create_publisher<nav_msgs::msg::Odometry>("ekf/odom", 10);
     ekf_apriltag_pub_ = this->create_publisher<nav_msgs::msg::Odometry>("ekf/apriltag", 10);
     RCLCPP_INFO(this->get_logger(), "Joint State Estimator Initialized!!");
-    ekf_ = std::make_unique<EKF>(1.0 / 100); // 20 Hz
+    ekf_ = std::make_unique<EKF>(1.0 / 200); // 20 Hz
 }
 
 void JointStateEstimator::tf_to_odom(const tf2::Transform& t, nav_msgs::msg::Odometry& odom)

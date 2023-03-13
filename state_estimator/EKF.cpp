@@ -125,11 +125,11 @@ EKF::EKF(const double dt) : DT(dt)
 
     // Motional model covariance
     Q = Eigen::Matrix4f::Identity();
-    Q(0,0)=0.01 * 0.05;
-    Q(1,1)=0.01 * 0.05;
+    Q(0,0)=0.1 * 0.05;
+    Q(1,1)=0.1 * 0.05;
     Q(2,2)= (1.0/180 * M_PI);
 //    Q(2,2)= 0.01 * 0.005;;
-    Q(3,3)=0.01 * 0.05;
+    Q(3,3)=0.1 * 0.05;
 
     // observation model covariance
     R = Eigen::Matrix3f::Identity();
