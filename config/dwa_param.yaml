@@ -1,0 +1,19 @@
+max_speed: 0.345
+min_speed: -0.345
+max_yawrate: 2.0472
+max_accel: 0.4
+robot_radius: 0.172
+max_dyawrate: 2.0472
+
+v_reso: 0.01
+yawrate_reso: 0.00349
+
+dt: 0.03
+predict_time: 1.5
+to_goal_cost_gain: 0.75
+to_obstacle_cost_gain: 0.95
+speed_cost_gain: 0.50
+
+goal_radius: 0.2
+
+obstacles: [[4, 3], [-1, 5], [1, 4], [2.5, 5.5]]

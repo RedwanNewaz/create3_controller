@@ -1,0 +1,8 @@
+/odom:
+  reliability: best_effort
+  history: keep_last
+  depth: 1
+/cmd_vel:
+  reliability: best_effort
+  history: keep_last
+  depth: 1
