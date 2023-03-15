@@ -46,7 +46,8 @@ include_directories(include
 add_library(COM include/COM.h src/COM.cpp include/utilities/param_manager2.h)
 set_source_files_properties(COM.cpp PROPERTIES COMPILE_FLAGS "-include include/COM.h")
 
-add_subdirectory(state_estimator)
+
+
 
 add_executable(create3_controller_node src/create3_controller_node.cpp
         src/dwa_planner.cpp
@@ -73,7 +74,8 @@ target_link_libraries(create3_controller_node
         yaml-cpp
         COM
         )
-
+add_subdirectory(state_estimator)
+add_subdirectory(create3_controller_gui)
 target_include_directories(create3_controller_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
@@ -102,5 +104,6 @@ if(BUILD_TESTING)
 endif()
 
 ament_package()
+
 
 

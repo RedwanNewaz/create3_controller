@@ -1,6 +1,8 @@
 find_package(Eigen3 REQUIRED)
-add_executable(create3_state_estimator state_estimator_node.cpp EKF.cpp EKF.h EKF.h FilterBase.h FilterBase.h StateViz.cpp StateViz.h ComplementaryFilter.h ComplementaryFilter.h StateEstimatorBase.h StateEstimatorBase.h JointStateEstimator.cpp JointStateEstimator.h)
 include_directories(${Eigen_INCLUDE_DIRS})
+
+add_executable(create3_state_estimator state_estimator_node.cpp EKF.cpp EKF.h EKF.h FilterBase.h FilterBase.h StateViz.cpp StateViz.h ComplementaryFilter.h ComplementaryFilter.h StateEstimatorBase.h StateEstimatorBase.h JointStateEstimator.cpp JointStateEstimator.h)
+
 ament_target_dependencies(
         create3_state_estimator
         geometry_msgs
@@ -18,9 +20,21 @@ target_link_libraries(create3_state_estimator
         yaml-cpp
         COM
         Eigen3::Eigen
-
         )
 
 
+#install(DIRECTORY ../launch
+#        DESTINATION share/${PROJECT_NAME})
+
+
+target_include_directories(create3_state_estimator PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/state_estimator>
+        $<INSTALL_INTERFACE:include>)
+target_compile_features(create3_state_estimator PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+
+install(TARGETS create3_state_estimator
+        DESTINATION lib/${PROJECT_NAME})
+
 install(DIRECTORY ../launch
         DESTINATION share/${PROJECT_NAME})
+

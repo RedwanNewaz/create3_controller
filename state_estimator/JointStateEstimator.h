@@ -11,7 +11,7 @@
 #include <tf2/convert.h>
 #include <nav_msgs/msg/odometry.hpp>
 #include "EKF.h"
-
+#include "tf2_ros/buffer_interface.h"
 //https://docs.ros.org/en/foxy/How-To-Guides/Overriding-QoS-Policies-For-Recording-And-Playback.html
 //ros2 run tf2_ros static_transform_publisher 0 0 0  0 0 0 map odom
 
@@ -30,6 +30,7 @@ private:
 
     const std::string fromFrameRel = "camera";
     const std::string toFrameRel = "tag36h11:7";
+    std::string estimatorType_;
     tf2::Transform *odomInit_, *apriltagInit_;
     std::once_flag flagOdom_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr ekf_odom_pub_, ekf_apriltag_pub_;
@@ -56,6 +57,8 @@ private:
     std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
     std::unique_ptr<FusedData> fusedData_;
+    tf2::TimePoint lastTFstamp_;
+
 
 protected:
     void tf_to_odom(const tf2::Transform& t, nav_msgs::msg::Odometry& odom);

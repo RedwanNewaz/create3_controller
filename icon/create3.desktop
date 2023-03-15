@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=2.0
+Name=Create3
+Comment=Autonomous Ground Vehicle
+Exec=/home/airlab/colcon_ws/src/create3_controller/icon/create3.sh
+Icon=/home/airlab/colcon_ws/src/create3_controller/icon/create3.png
+Terminal=true
+StartupWMClass=Create3 Controller
+Type=Application
+Categories=Research and development
+MimeType=Create3 Controller Gui
