@@ -36,7 +36,7 @@ class OffsetParser(Substitution):
 
 
 ARGUMENTS = [
-    DeclareLaunchArgument('use_rviz', default_value='true',
+    DeclareLaunchArgument('use_rviz', default_value='false',
                           choices=['true', 'false'],
                           description='Start rviz.'),
     DeclareLaunchArgument('use_gazebo_gui', default_value='true',

@@ -1,5 +1,5 @@
 #cmake_minimum_required(VERSION 3.5)
-
+#
 #project(create3_controller_gui LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -11,7 +11,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#CPMAddPackage("gh:fmtlib/fmt#7.1.3")
+CPMAddPackage("gh:fmtlib/fmt#7.1.3")
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)

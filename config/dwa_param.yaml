@@ -17,3 +17,5 @@ speed_cost_gain: 0.50
 goal_radius: 0.2
 
 obstacles: [[4, 3], [-1, 5], [1, 4], [2.5, 5.5]]
+
+

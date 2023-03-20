@@ -87,6 +87,9 @@ install(TARGETS create3_controller_node
 install(DIRECTORY launch
         DESTINATION share/${PROJECT_NAME})
 
+install(DIRECTORY config
+		DESTINATION share/${PROJECT_NAME})
+
 #install(
 #        DIRECTORY lib/
 #        DESTINATION lib

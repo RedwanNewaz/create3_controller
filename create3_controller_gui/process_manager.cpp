@@ -9,6 +9,7 @@ ProcessManager::ProcessManager(QWidget *parent) : QWidget(parent)
 //    controller param /home/airlab/colcon_ws/src/create3_controller/config/dwa_param.yaml
     m_programs[CONTROLLER] = "ros2 run create3_controller create3_controller_node";
 
+    m_programs[MAP] = "ros2 launch create3_controller map_server.launch.py";
 
     // roslaunch with args
     m_programs[STATE_EST] = "ros2 run create3_controller create3_state_estimator";
@@ -59,6 +60,11 @@ void ProcessManager::start(const std::set<int> &pids)
                 }
                 templateProg += " {1}";
                 templateProg = fmt::format(templateProg, m_programs[pid], filename.toStdString());
+                if (pids.count(GAZEBO))
+                {
+                    qDebug() << "[ProcessManager] Gzebo RVIZ selected";
+                    templateProg = "ros2 launch irobot_create_common_bringup rviz2.launch.py";
+                }
 
             }
             else if(pid == BAG)
@@ -92,6 +98,12 @@ void ProcessManager::start(const std::set<int> &pids)
                 }
                 templateProg = fmt::format(templateProg, m_programs[pid], arg);
             }
+            else if (pid == CONTROLLER)
+            {
+                std::string arg = "/home/roboticslab/colcon_ws/src/create3_controller/config/dwa_param.yaml";
+                templateProg += " {1}";
+                templateProg = fmt::format(templateProg, m_programs[pid], arg);
+            }
             else
             {
                 templateProg = fmt::format(templateProg, m_programs[pid]);
@@ -121,6 +133,17 @@ void ProcessManager::stop()
     for(auto& proc: m_processes)
     {
         proc->terminate();
+        try{
+            QProcess::execute("taskkill", {"/pid", QString::number(proc->processId()), "/t", "/f"});
+
+        }
+        catch (...)
+        {
+
+        }
+
+
+
     }
     m_processes.clear();
 }
