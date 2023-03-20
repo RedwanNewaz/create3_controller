@@ -11,6 +11,8 @@ ProcessManager::ProcessManager(QWidget *parent) : QWidget(parent)
 
     m_programs[MAP] = "ros2 launch create3_controller map_server.launch.py";
 
+    m_programs[APRILTAG] = "ros2 launch create3_localization apriltag_launch.py";
+
     // roslaunch with args
     m_programs[STATE_EST] = "ros2 run create3_controller create3_state_estimator";
 
