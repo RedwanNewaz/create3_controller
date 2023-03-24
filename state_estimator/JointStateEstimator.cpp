@@ -34,6 +34,12 @@ JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEst
     RCLCPP_INFO(this->get_logger(), "%s State Estimator Initialized!!", estimatorType_.c_str());
     ekf_ = std::make_unique<EKF>(1.0 / 200); // 200 Hz
 
+    // enable logger
+    std::vector<std::string> header = {"cam_x", "cam_y", "cam_theta", "odom_x", "odom_y", "odom_theta", "cmd_vx", "cmd_vy", "cmd_wz", "odom_vx", "odom_vy", "odom_wz"};
+    const std::string outputFolder = "/home/airlab/colcon_ws/src/create3_controller/results";
+    logger_.addHeader(header);
+    logger_.setOutputFolder(outputFolder);
+
 }
 
 void JointStateEstimator::tf_to_odom(const tf2::Transform& t, nav_msgs::msg::Odometry& odom)
@@ -170,8 +176,12 @@ void JointStateEstimator::sensorFusion()
     ekf_odom_pub_->publish(msg);
 
     // reset
-    if(!std::count(fusedData_->updateStatus.begin(), fusedData_->updateStatus.end(), false))
-    {
-        fusedData_ = std::make_unique<FusedData>();
-    }
+//    if(!std::count(fusedData_->updateStatus.begin(), fusedData_->updateStatus.end(), false))
+//    {
+//        fusedData_ = std::make_unique<FusedData>();
+//    }
+//
+
+    logger_.addRow(fusedData_->getLog());
+
 }
