@@ -75,7 +75,8 @@ target_link_libraries(create3_controller_node
         COM
         )
 add_subdirectory(state_estimator)
-add_subdirectory(create3_controller_gui)
+#add_subdirectory(dwa_controller)
+#add_subdirectory(create3_controller_gui)
 target_include_directories(create3_controller_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)

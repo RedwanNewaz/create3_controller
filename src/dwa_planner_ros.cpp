@@ -8,7 +8,7 @@ dwa_planner_ros::dwa_planner_ros(StatePtr stateEstimator):Node("DWA"), stateEsti
     initialized_ = false;
 
     // create subscribers
-    odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("odom", 10, std::bind(
+    odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("ekf/odom", 10, std::bind(
             &dwa_planner_ros::odom_callback, this, std::placeholders::_1)
     );
     obs_sub_ = this->create_subscription<geometry_msgs::msg::PoseArray>("obstacles", 10, [&](const geometry_msgs::msg::PoseArray::SharedPtr msg)

@@ -36,7 +36,7 @@ JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEst
 
     // enable logger
     std::vector<std::string> header = {"cam_x", "cam_y", "cam_theta", "odom_x", "odom_y", "odom_theta", "cmd_vx", "cmd_vy", "cmd_wz", "odom_vx", "odom_vy", "odom_wz"};
-    const std::string outputFolder = "/home/airlab/colcon_ws/src/create3_controller/results";
+    const std::string outputFolder = "/home/roboticslab/colcon_ws/src/create3_controller/results";
     logger_.addHeader(header);
     logger_.setOutputFolder(outputFolder);
 
@@ -223,6 +223,6 @@ void JointStateEstimator::sensorFusion()
 //    }
 //
 
-    logger_.addRow(fusedData_->getLog());
+//    logger_.addRow(fusedData_->getLog());
 
 }

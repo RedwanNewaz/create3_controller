@@ -26,7 +26,11 @@ ros2 launch irobot_create_gazebo_bringup create3_gazebo.launch.py x:=-0.5 y:=1.7
 ros2 param set /motion_control safety_override full
 ```
 
+### state estimator ard 
 
+```bash 
+--ros-args -p sensor:=fusion
+```
 
 ## create ros package 
 
