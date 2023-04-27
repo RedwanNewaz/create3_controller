@@ -13,7 +13,6 @@
 #include "EKF.h"
 #include "tf2_ros/buffer_interface.h"
 #include "LoggerCSV.h"
-
 //https://docs.ros.org/en/foxy/How-To-Guides/Overriding-QoS-Policies-For-Recording-And-Playback.html
 //ros2 run tf2_ros static_transform_publisher 0 0 0  0 0 0 map odom
 
@@ -25,13 +24,23 @@ public:
         delete odomInit_;
         delete apriltagInit_;
     }
+    tf2::Transform getCurrentPose()
+    {
+        return robotState_;
+    }
+    bool isInitialized()
+    {
+        return (odomInit_ != nullptr && fusedData_->updateStatus[ODOM]);
+    }
+
+
 
 private:
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_sub_;
 
     const std::string fromFrameRel = "camera";
-    const std::string toFrameRel = "tag36h11:7";
+    std::string toFrameRel;
     std::string estimatorType_;
     tf2::Transform *odomInit_, *apriltagInit_;
     std::once_flag flagOdom_;
@@ -98,6 +107,7 @@ private:
 
 private:
     LoggerCSV logger_;
+    tf2::Transform robotState_;
 protected:
     void tf_to_odom(const tf2::Transform& t, nav_msgs::msg::Odometry& odom);
     void odom_callback(nav_msgs::msg::Odometry::SharedPtr msg);

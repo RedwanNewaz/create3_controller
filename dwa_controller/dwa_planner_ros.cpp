@@ -6,6 +6,7 @@
 
 dwa_planner_ros::dwa_planner_ros(StatePtr stateEstimator):Node("DWA"), stateEstimator_(stateEstimator) {
     initialized_ = false;
+    this->declare_parameter("control", "dwa_param.yaml");
 
     // create subscribers
     odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("ekf/odom", 10, std::bind(
@@ -24,11 +25,16 @@ dwa_planner_ros::dwa_planner_ros(StatePtr stateEstimator):Node("DWA"), stateEsti
     timer_ = this->create_wall_timer(30ms, std::bind(&dwa_planner_ros::timer_callback, this));
 
     // initialize internal parameters
+    std::string param_file = this->get_parameter("control").get_parameter_value().get<std::string>();
+    RCLCPP_INFO(this->get_logger(), "dwa_planner_ros Initialized with %s !!", param_file.c_str());
+    parameters_ = std::make_shared<param_manager2>(param_file);
+
+
     control_[0] = control_[1] = 0;
-    std::function<double(const string&)> f = [&](const string& param)
-    {return stateEstimator_->parameters->get_param<double>(param);};
+    std::function<double(const std::string&)> f = [&](const std::string& param)
+    {return parameters_->get_param<double>(param);};
     config_.update_param(f);
-    stateEstimator_->parameters->get_obstacles(obstacles_);
+    parameters_->get_obstacles(obstacles_);
 }
 
 
@@ -37,15 +43,28 @@ dwa_planner_ros::dwa_planner_ros(StatePtr stateEstimator):Node("DWA"), stateEsti
 void dwa_planner_ros::timer_callback() {
 
     // don't execute until a goal location is given
-    if(!initialized_)
+    if(!initialized_ || !stateEstimator_->isInitialized())
         return;
 
     // compute state difference
     auto goal_position = goal_pose_.getOrigin();
     tf2::Transform current_pose = stateEstimator_->getCurrentPose();
+
+
     auto curr_position = current_pose.getOrigin();
     tf2::Vector3 position_diff = goal_position - curr_position;
-    double current_angle = tf2::getYaw(current_pose.getRotation());
+
+    auto goal_heading = atan2(position_diff.y(), position_diff.x());
+    auto alpha = atan2(goal_position.y(), goal_position.x());
+
+
+//    double current_angle = tf2::getYaw(current_pose.getRotation());
+
+    double roll, pitch, yaw, current_angle;
+    tf2::Matrix3x3 m(current_pose.getRotation());
+    m.getRPY(roll, pitch, yaw);
+    current_angle = yaw - M_PI_2;
+//    RCLCPP_INFO(get_logger(), "goal heading angle = %lf", goal_heading);
 
     // compute terminal condition
     double remainDist = sqrt(pow(position_diff.x(), 2) + pow(position_diff.y(), 2) );
@@ -68,8 +87,11 @@ void dwa_planner_ros::timer_callback() {
     }
 
     // publish cmd_vel and update state
+//    if(alpha > M_PI_2 || alpha < -M_PI_2)
+//        control_[0] = -control_[0];
+
     publish_cmd(control_[0], control_[1]);
-    stateEstimator_->add_cmd_vel(control_[0], control_[1]);
+
 
 }
 
@@ -77,21 +99,19 @@ void dwa_planner_ros::timer_callback() {
 //-------------------------------ROS SUBSCRIBERS--------------------------------------------------------
 
 void dwa_planner_ros::odom_callback(nav_msgs::msg::Odometry::SharedPtr msg) {
-    const std::lock_guard<mutex> lk(mu_);
-    stateEstimator_->odom_callback(msg);
-    std::call_once(obs_flag_, [&](){ publish_obstacles(); });
+
 }
 
 void dwa_planner_ros::rviz_callback(geometry_msgs::msg::PoseStamped::SharedPtr msg) {
-    const std::lock_guard<mutex> lk(mu_);
-    goal_pose_ = state_estimator::poseToTransform(msg);
+    const std::lock_guard<std::mutex> lk(mu_);
+    goal_pose_ = poseToTransform(msg);
     initialized_ = true;
     publish_obstacles();
 }
 
 
 void dwa_planner_ros::obstacle_callback(geometry_msgs::msg::PoseArray::SharedPtr msg) {
-    const std::lock_guard<mutex> lk(mu_);
+    const std::lock_guard<std::mutex> lk(mu_);
     obstacles_.clear();
     for(auto& pose: msg->poses)
     {
@@ -102,11 +122,23 @@ void dwa_planner_ros::obstacle_callback(geometry_msgs::msg::PoseArray::SharedPtr
 //-------------------------------ROS PUBLISHERS--------------------------------------------------------
 
 void dwa_planner_ros::publish_cmd(double v, double w) {
+    const std::lock_guard<std::mutex> lk(mu_);
     geometry_msgs::msg::Twist cmd_vel;
-    cmd_vel.linear.x = v;
-    cmd_vel.angular.z = w;
+    double safe = stateEstimator_->safetyProb();
+    if(safe >= 0.5) // at least 50% safe
+    {
+        cmd_vel.linear.x = v;
+        cmd_vel.angular.z = w;
+        RCLCPP_INFO(this->get_logger(), "[Collision Prob = %lf] sending cmd = (%lf, %lf)", 1 - safe, v, w);
+    }
+    else
+    {
+        RCLCPP_WARN(this->get_logger(), "[Collision Prob = %lf] ignoring cmd = (%lf, %lf)", 1 - safe, v, w);
+        cmd_vel.linear.x = 0;
+        cmd_vel.angular.z = 0;
+    }
+
     cmd_vel_->publish(cmd_vel);
-    //    RCLCPP_INFO(this->get_logger(), "%lf, %lf", v, w);
 }
 
 void dwa_planner_ros::publish_short_horizon_traj(Traj &traj) {

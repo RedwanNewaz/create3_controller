@@ -10,7 +10,7 @@
 #include<cmath>
 #include <functional>
 
-#define PI 3.141592653
+//#define PI 3.141592653
 
 using Traj = std::vector<std::array<double, 5>>;
 using Obstacle = std::vector<std::array<double, 2>>;
@@ -25,13 +25,13 @@ namespace DynamicWindow{
     public:
         double max_speed = 0.345;
         double min_speed = -0.345;
-        double max_yawrate = 60.0 * PI / 180.0;
+        double max_yawrate = 60.0 * M_PI / 180.0;
         double max_accel = 0.4;
         double robot_radius = 0.345 / 2;
-        double max_dyawrate = 60.0 * PI / 180.0;
+        double max_dyawrate = 60.0 * M_PI / 180.0;
 
         double v_reso = 0.01;
-        double yawrate_reso = 0.2 * PI / 180.0;
+        double yawrate_reso = 0.2 * M_PI / 180.0;
 
         double dt = 0.03;
         double predict_time = 3.0;

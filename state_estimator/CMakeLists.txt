@@ -1,7 +1,4 @@
-find_package(Eigen3 REQUIRED)
-include_directories(${Eigen_INCLUDE_DIRS})
-
-add_executable(create3_state_estimator state_estimator_node.cpp EKF.cpp EKF.h EKF.h FilterBase.h FilterBase.h StateViz.cpp StateViz.h ComplementaryFilter.h ComplementaryFilter.h StateEstimatorBase.h StateEstimatorBase.h JointStateEstimator.cpp JointStateEstimator.h LoggerCSV.h)
+add_executable(create3_state_estimator state_estimator_node.cpp ${STATE_ESTIMATOR_SRC_FILES})
 
 ament_target_dependencies(
         create3_state_estimator
@@ -18,7 +15,6 @@ target_link_libraries(create3_state_estimator
         ${nav_msgs_LIBRARIES}
         ${visualization_msgs_LIBRARIES}
         yaml-cpp
-        COM
         Eigen3::Eigen
         )
 

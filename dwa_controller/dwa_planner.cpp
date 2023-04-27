@@ -127,6 +127,8 @@ Traj DynamicWindow::planner::calc_final_input(const State &x, Control &u, const 
             if (min_cost >= final_cost){
                 min_cost = final_cost;
                 min_u = Control{{v, y}};
+//                int N = traj.size() / 2;
+//                min_u = Control{{traj[N][3], traj[N][4]}};
                 best_traj = traj;
             }
         }

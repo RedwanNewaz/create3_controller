@@ -9,6 +9,8 @@
 JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEstimatorBase(nodeName)
 {
     this->declare_parameter("sensor", "odom");
+    this->declare_parameter("robotTag", "tag36h11:7");
+    this->declare_parameter("logOutput", "/var/tmp");
     // collect all the sensor and control information: (i) odom (ii) apriltag tf, and (iii) cmd_vel
     odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("odom", qos, std::bind(
             &JointStateEstimator::odom_callback, this, std::placeholders::_1)
@@ -29,14 +31,14 @@ JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEst
 
 
     estimatorType_ = this->get_parameter("sensor").get_parameter_value().get<std::string>();
-
+    toFrameRel = this->get_parameter("robotTag").get_parameter_value().get<std::string>();
 
     RCLCPP_INFO(this->get_logger(), "%s State Estimator Initialized!!", estimatorType_.c_str());
     ekf_ = std::make_unique<EKF>(1.0 / 200); // 200 Hz
 
     // enable logger
     std::vector<std::string> header = {"cam_x", "cam_y", "cam_theta", "odom_x", "odom_y", "odom_theta", "cmd_vx", "cmd_vy", "cmd_wz", "odom_vx", "odom_vy", "odom_wz"};
-    const std::string outputFolder = "/home/roboticslab/colcon_ws/src/create3_controller/results";
+    const std::string outputFolder = this->get_parameter("logOutput").get_parameter_value().get<std::string>();;
     logger_.addHeader(header);
     logger_.setOutputFolder(outputFolder);
 
@@ -135,7 +137,7 @@ void JointStateEstimator::sensorFusion()
 
 
 
-    tf2::Transform OdomFilter;
+
 
     if(estimatorType_ == "fusion")
     {
@@ -181,7 +183,7 @@ void JointStateEstimator::sensorFusion()
         double theta = getYaw(q);
         q.setRPY(0, 0, theta);
         odomEkf.setRotation(q);
-        ekf_->update(odomEkf, fusedData_->cmd, OdomFilter);
+        ekf_->update(odomEkf, fusedData_->cmd, robotState_);
 
 //# fuse cam + odom_vel
 
@@ -191,29 +193,29 @@ void JointStateEstimator::sensorFusion()
         camEkf.setOrigin(tf2::Vector3(cam_x, cam_y, 0));
         // use odom orientation for yaw
         camEkf.setRotation(q);
-        ekf_->update(OdomFilter, fusedData_->odomTwsit, OdomFilter);
+        ekf_->update(robotState_, fusedData_->odomTwsit, robotState_);
 
 
     }
     else if(estimatorType_ == "odom")
     {
-        OdomFilter = fusedData_->odom;
+        robotState_ = fusedData_->odom;
         double roll, pitch, yaw;
         auto q = fusedData_->odom.getRotation();
         tf2::Matrix3x3 m(q);
         m.getRPY(roll, pitch, yaw);
         double theta = fmod(yaw + M_PI, 2 * M_PI) - M_PI_2;
         q.setRPY(0, 0, theta);
-        OdomFilter.setRotation(q);
+        robotState_.setRotation(q);
     }
     else if(estimatorType_ == "apriltag")
     {
-        OdomFilter = fusedData_->apriltag;
+        robotState_ = fusedData_->apriltag;
     }
 
     // convert to odom message
     nav_msgs::msg::Odometry msg;
-    tf_to_odom(OdomFilter, msg);
+    tf_to_odom(robotState_, msg);
     ekf_odom_pub_->publish(msg);
 
     // reset

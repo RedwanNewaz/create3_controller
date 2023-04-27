@@ -37,7 +37,7 @@ public:
         double x = std::min(maxIrValue(), mu ) - 1e-6;
         const double normFactor = 1.0 / std * sqrt(2 * M_PI);
         double collisionProb = normFactor * exp(-0.5 * (mu - x) / std);
-        return 1.0 - collisionProb;
+        return std::max(0.0, 1.0 - collisionProb);
     }
 
 protected:
