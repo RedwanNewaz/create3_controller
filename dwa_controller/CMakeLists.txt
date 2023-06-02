@@ -6,21 +6,27 @@ set(DWA_CONTROLLER_SRC_FILES
         dwa_planner_ros.cpp
        )
 
-add_executable(dwa_controller dwa_controller_node.cpp ${DWA_CONTROLLER_SRC_FILES} ${STATE_ESTIMATOR_SRC_FILES})
+add_executable(dwa_controller dwa_controller_node.cpp
+        ../Core/ControllerManager.cpp ../Core/ControllerManager.h
+        ${DWA_CONTROLLER_SRC_FILES} ${STATE_ESTIMATOR_SRC_FILES})
 
 ament_target_dependencies(
         dwa_controller
         geometry_msgs
         rclcpp
+        rclcpp_action
         tf2
         tf2_ros
+        sensor_msgs
 )
 
 target_link_libraries(dwa_controller
         ${rclcpp_LIBRARIES}
+        ${rclcpp_action_LIBRARIES}
         ${geometry_msgs_LIBRARIES}
         ${irobot_create_msgs_LIBRARIES}
         ${nav_msgs_LIBRARIES}
+        ${sensor_msgs_LIBRARIES}
         ${visualization_msgs_LIBRARIES}
         yaml-cpp
         Eigen3::Eigen

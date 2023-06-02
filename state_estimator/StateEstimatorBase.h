@@ -28,6 +28,7 @@ public:
         filter_ = std::make_unique<ComplementaryFilter>(0.99);
         timer_ = this->create_wall_timer(15ms, [this] { timer_callback(); });
 
+
     }
 
     double safetyProb()
@@ -49,8 +50,8 @@ protected:
         lookupTransform();
         sensorFusion();
         double safe = safetyProb();
-        if(safe <= 0.5)
-            RCLCPP_INFO(get_logger(), "[safety ]: prob = %lf", safe);
+//        if(safe <= 0.5)
+//            RCLCPP_INFO(get_logger(), "[safety ]: prob = %lf", safe);
     }
     double maxIrValue()
     {

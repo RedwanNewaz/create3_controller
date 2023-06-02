@@ -4,7 +4,7 @@
 
 #include "create3_controller/dwa_planner_ros.h"
 
-dwa_planner_ros::dwa_planner_ros(StatePtr stateEstimator):Node("DWA"), stateEstimator_(stateEstimator) {
+dwa_planner_ros::dwa_planner_ros(StatePtr stateEstimator):ControllerManager("DWA", stateEstimator_) {
     initialized_ = false;
     this->declare_parameter("control", "dwa_param.yaml");
 
@@ -22,7 +22,7 @@ dwa_planner_ros::dwa_planner_ros(StatePtr stateEstimator):Node("DWA"), stateEsti
     cmd_vel_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel",1);
     traj_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("short_traj", 10);
     obs_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("obstacles", 10);
-    timer_ = this->create_wall_timer(30ms, std::bind(&dwa_planner_ros::timer_callback, this));
+
 
     // initialize internal parameters
     std::string param_file = this->get_parameter("control").get_parameter_value().get<std::string>();
@@ -40,15 +40,16 @@ dwa_planner_ros::dwa_planner_ros(StatePtr stateEstimator):Node("DWA"), stateEsti
 
 //-------------------------------MAIN LOOP--------------------------------------------------------
 
-void dwa_planner_ros::timer_callback() {
+void dwa_planner_ros::execute(const tf2::Transform &current_pose) {
 
     // don't execute until a goal location is given
-    if(!initialized_ || !stateEstimator_->isInitialized())
+    if(!initialized_)
         return;
 
     // compute state difference
     auto goal_position = goal_pose_.getOrigin();
-    tf2::Transform current_pose = stateEstimator_->getCurrentPose();
+    goal_position.setZ(0.0);
+
 
 
     auto curr_position = current_pose.getOrigin();
@@ -121,25 +122,6 @@ void dwa_planner_ros::obstacle_callback(geometry_msgs::msg::PoseArray::SharedPtr
 
 //-------------------------------ROS PUBLISHERS--------------------------------------------------------
 
-void dwa_planner_ros::publish_cmd(double v, double w) {
-    const std::lock_guard<std::mutex> lk(mu_);
-    geometry_msgs::msg::Twist cmd_vel;
-    double safe = stateEstimator_->safetyProb();
-    if(safe >= 0.5) // at least 50% safe
-    {
-        cmd_vel.linear.x = v;
-        cmd_vel.angular.z = w;
-        RCLCPP_INFO(this->get_logger(), "[Collision Prob = %lf] sending cmd = (%lf, %lf)", 1 - safe, v, w);
-    }
-    else
-    {
-        RCLCPP_WARN(this->get_logger(), "[Collision Prob = %lf] ignoring cmd = (%lf, %lf)", 1 - safe, v, w);
-        cmd_vel.linear.x = 0;
-        cmd_vel.angular.z = 0;
-    }
-
-    cmd_vel_->publish(cmd_vel);
-}
 
 void dwa_planner_ros::publish_short_horizon_traj(Traj &traj) {
     geometry_msgs::msg::PoseArray msg;

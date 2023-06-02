@@ -17,6 +17,8 @@ find_package(visualization_msgs REQUIRED)
 find_package(rcl_interfaces REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(rclcpp_action REQUIRED)
 
 
 
@@ -36,6 +38,9 @@ include_directories(include
 		${rcl_interfaces_INCLUDE_DIRS}
 		${tf2_INCLUDE_DIRS}
 		${tf2_ros_INCLUDE_DIRS}
+
+		${rclcpp_action_INCLUDE_DIRS}
+		${sensor_msgs_INCLUDE_DIRS}
         )
 
 
