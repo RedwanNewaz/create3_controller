@@ -53,25 +53,32 @@ public:
       m_output_folder = output;
   }
 
+  void saveLog()
+  {
+      std::string filename = m_output_folder + "/logger_" + getTimestamp() + ".csv";
+      std::cout << "[LoggerCSV] request to save results @ " + filename << std::endl;
+      // when this class will be distructed, we will write the logger values from ROM to a csv file on the hard drive.
+      std::string value = m_data.str();
+
+      // don't write file if there is no data added to the logger
+      if(!value.length())
+          return;
+
+      // remove last new line from the string
+      value.pop_back();
+
+      // make sure you have unique name for each logger file. Use system timestamp to serve this purpose
+
+      std::ofstream myfile(filename);
+      myfile << value;
+      myfile.close();
+      std::cout << "[LoggerCSV] saved results @ " + filename << std::endl;
+  }
+
 /// @brief When this class will be distructed, we will write the logger values from ROM to a csv file on the hard drive.
   ~LoggerCSV()
   {
-    // when this class will be distructed, we will write the logger values from ROM to a csv file on the hard drive.
-    std::string value = m_data.str();
-
-    // don't write file if there is no data added to the logger
-    if(!value.length())
-      return;
-
-    // remove last new line from the string
-    value.pop_back();
-
-    // make sure you have unique name for each logger file. Use system timestamp to serve this purpose
-    std::string filename = m_output_folder + "/logger_" + getTimestamp() + ".csv";
-    std::ofstream myfile(filename);
-    myfile << value;
-    myfile.close();
-    std::cout << "[LoggerCSV] save results @ " + filename << std::endl;
+      saveLog();
   }
 
   /// @brief This function is used to generate unique name for a file with timestamp
@@ -90,6 +97,7 @@ public:
     addRow(data);
     m_header_len = data.size();
     m_header_enabled = true;
+    m_init_time = std::chrono::system_clock::now();
   }
 
   template<typename T>
@@ -124,6 +132,9 @@ public:
         m_data << item;
     m_data << "\n";
 
+    TIME_POINT curr = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = curr-m_init_time;
+    std::cout << "[LoggerCSV] log added @ time "<< elapsed_seconds.count() << std::endl;
 
   }
 
@@ -132,7 +143,7 @@ private:
   size_t m_header_len;
   bool m_header_enabled;
   bool m_timer_enabled;
-  TIME_POINT m_last_update_time;
+  TIME_POINT m_last_update_time, m_init_time;
   int m_pause_time_ms;
   std::string m_output_folder;
 
