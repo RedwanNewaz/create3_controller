@@ -45,8 +45,6 @@ void manager::control_loop() {
 
     else if (controlMode_ == SAFE_LOCK)
     {
-
-
         publish_cmd(0, 0);
         Clock::duration elaspsedTime = Clock::now() - lock_time_;
         auto waitTime = std::chrono::duration_cast<std::chrono::seconds>(elaspsedTime).count();
