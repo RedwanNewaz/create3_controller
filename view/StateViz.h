@@ -15,7 +15,7 @@ namespace view
 {
     class StateViz: public rclcpp::Node{
     public:
-        explicit StateViz(const std::string& nodeName);
+        explicit StateViz(const std::string& nodeName, const std::string& frameName = "map");
     private:
         rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr create3_state_pub_;
         rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr create3_state_sub_, create3_state_sub2_, create3_state_sub3_;
@@ -29,6 +29,7 @@ namespace view
     protected:
         void state_callback(nav_msgs::msg::Odometry::SharedPtr msg, const COLOR& color);
         void publish_traj();
+        std::string frameName_;
     };
 }
 

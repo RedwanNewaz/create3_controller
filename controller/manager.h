@@ -23,6 +23,7 @@ namespace controller
 
 
         manager(const std::string &nodeName, const StatePtr &stateEstimator);
+        void overrideSafety(bool status);
 
     protected:
         void publish_cmd(double v, double w);
@@ -43,6 +44,7 @@ namespace controller
         TimePoint lock_time_;
     private:
         void control_loop();
+        bool safetyOverlook_;
     };
 }
 

@@ -54,7 +54,7 @@ set(create3_model_SRC_FILES
 		${PROJECT_SOURCE_DIR}/model/JointStateEstimator.cpp
 		${PROJECT_SOURCE_DIR}/model/JointStateEstimator.h
 		${PROJECT_SOURCE_DIR}/include/utilities/LoggerCSV.h
-		)
+		${PROJECT_SOURCE_DIR}/model/GazeboStateEstimator.h)
 
 add_library(create3_model ${create3_model_SRC_FILES})
 target_link_libraries(create3_model
@@ -103,6 +103,20 @@ add_executable(dwa_controller src/dwa_controller_node.cpp
 		${PROJECT_SOURCE_DIR}/include/utilities/param_manager2.h
 		)
 target_link_libraries(dwa_controller create3_model create3_view yaml-cpp)
+
+
+add_executable(gazebo_controller src/gazebo_sim_node.cpp
+		${PROJECT_SOURCE_DIR}/controller/manager.h
+		${PROJECT_SOURCE_DIR}/controller/manager.cpp
+		${PROJECT_SOURCE_DIR}/controller/DWA/dwa_planner.h
+		${PROJECT_SOURCE_DIR}/controller/DWA/dwa_planner.cpp
+		${PROJECT_SOURCE_DIR}/controller/DWA/dwa_planner_ros.h
+		${PROJECT_SOURCE_DIR}/controller/DWA/dwa_planner_ros.cpp
+		${PROJECT_SOURCE_DIR}/include/utilities/param_manager2.h
+		${PROJECT_SOURCE_DIR}/controller/PID/UnicycleController.h
+		${PROJECT_SOURCE_DIR}/controller/PID/UnicycleController.cpp
+		)
+target_link_libraries(gazebo_controller create3_model create3_view yaml-cpp)
 
 
 

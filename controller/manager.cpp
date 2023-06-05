@@ -11,6 +11,7 @@ Node(nodeName), stateEstimator_(stateEstimator)
     cmd_vel_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel",1);
     timer_ = this->create_wall_timer(30ms, std::bind(&manager::control_loop, this));
     controlMode_ = JOY_TELEOP;
+    safetyOverlook_ = false;
 }
 
 void manager::publish_cmd(double v, double w) {
@@ -30,7 +31,7 @@ void manager::control_loop() {
 
     if(controlMode_ == AUTO_NAV)
     {
-        if(safe >= safetyBound_) // at least 75% safe
+        if(safe >= safetyBound_ || safetyOverlook_) // at least 75% safe
         {
             tf2::Transform current_pose = stateEstimator_->getCurrentPose();
             execute(current_pose);
@@ -54,5 +55,10 @@ void manager::control_loop() {
             controlMode_ = JOY_TELEOP;
         }
     }
+
+}
+
+void manager::overrideSafety(bool status) {
+    safetyOverlook_ = status;
 
 }

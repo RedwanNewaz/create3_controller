@@ -43,6 +43,9 @@ namespace model
             return std::max(0.0, 1.0 - collisionProb);
         }
 
+        virtual tf2::Transform getCurrentPose() = 0;
+        virtual bool isInitialized() = 0;
+
     protected:
         virtual void lookupTransform() = 0;
         virtual void sensorFusion() = 0;
@@ -51,7 +54,7 @@ namespace model
         {
             lookupTransform();
             sensorFusion();
-            double safe = safetyProb();
+            // double safe = safetyProb();
             // if(safe <= 0.5)
             //     RCLCPP_INFO(get_logger(), "[safety ]: prob = %lf", safe);
         }

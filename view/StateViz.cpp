@@ -5,7 +5,7 @@
 #include "StateViz.h"
 using namespace view;
 
-StateViz::StateViz(const std::string& nodeName):Node(nodeName)
+StateViz::StateViz(const std::string& nodeName, const std::string& frameName):Node(nodeName), frameName_(frameName)
 {
     create3_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("ekf/apriltag", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
         state_callback(msg, RED);});
@@ -26,7 +26,7 @@ void StateViz::state_callback(nav_msgs::msg::Odometry::SharedPtr msg, const COLO
     visualization_msgs::msg::Marker marker;
     marker.action = visualization_msgs::msg::Marker::ADD;
     marker.header.stamp  = get_clock()->now();
-    marker.header.frame_id  = "map";
+    marker.header.frame_id  = frameName_;
 //    marker.type = visualization_msgs::msg::Marker::ARROW;
     marker.type = visualization_msgs::msg::Marker::MESH_RESOURCE;
     marker.mesh_resource = "package://irobot_create_description/meshes/body_visual.dae";

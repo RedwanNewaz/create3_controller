@@ -18,7 +18,7 @@ namespace view {
         using MARKER = visualization_msgs::msg::Marker;
         using PATH_VEC = std::vector<std::vector<double>>;
 
-        explicit ControllerViz(const std::string &nodeName);
+        explicit ControllerViz(const std::string &nodeName, const std::string &frameName = "map");
         void short_horizon_traj_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg);
         void obstacle_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg);
         void rviz_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);

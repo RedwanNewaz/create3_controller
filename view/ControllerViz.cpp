@@ -5,7 +5,7 @@
 #include "ControllerViz.h"
 
 namespace view {
-    ControllerViz::ControllerViz(const std::string &nodeName) : StateViz(nodeName) {
+    ControllerViz::ControllerViz(const std::string &nodeName, const std::string &frameName) : StateViz(nodeName, frameName) {
         traj_sub_ = this->create_subscription<geometry_msgs::msg::PoseArray>("short_traj", 10, [&](const geometry_msgs::msg::PoseArray::SharedPtr msg)
         {return short_horizon_traj_callback(msg);});
         rviz_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>("goal_pose", 10, std::bind(
@@ -17,7 +17,7 @@ namespace view {
     }
     void ControllerViz::obstacle_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg) {
         MARKER marker;
-        marker.header.frame_id = "map";
+        marker.header.frame_id = frameName_;
 
         marker.header.stamp = this->get_clock()->now();
         marker.ns = "obstacles";
@@ -58,7 +58,7 @@ namespace view {
 
     void ControllerViz::rviz_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
         MARKER marker;
-        marker.header.frame_id = "map";
+        marker.header.frame_id = frameName_;
 
         marker.header.stamp = this->get_clock()->now();
         marker.ns = "create3";
@@ -81,7 +81,7 @@ namespace view {
 
     ControllerViz::MARKER ControllerViz::gen_traj(const ControllerViz::PATH_VEC &path) {
         MARKER marker;
-        marker.header.frame_id = "map";
+        marker.header.frame_id = frameName_;
 
         marker.header.stamp = this->get_clock()->now();
         marker.ns = "create3";

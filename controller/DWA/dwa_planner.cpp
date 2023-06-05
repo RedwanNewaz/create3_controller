@@ -136,7 +136,7 @@ namespace controller
                 }
             }
         }
-        std::cout <<"[mincost] = " << min_cost << std::endl;
+//        std::cout <<"[mincost] = " << min_cost << std::endl;
         u = min_u;
         return best_traj;
     }

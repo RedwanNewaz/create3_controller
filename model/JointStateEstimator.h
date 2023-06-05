@@ -27,11 +27,11 @@ namespace model
             delete odomInit_;
             delete apriltagInit_;
         }
-        tf2::Transform getCurrentPose()
+        tf2::Transform getCurrentPose() override
         {
             return robotState_;
         }
-        bool isInitialized()
+        bool isInitialized() override
         {
             return (odomInit_ != nullptr && fusedData_->updateStatus[ODOM]);
         }
@@ -113,7 +113,7 @@ namespace model
         tf2::Transform robotState_;
     protected:
         void tf_to_odom(const tf2::Transform& t, nav_msgs::msg::Odometry& odom);
-        void odom_callback(nav_msgs::msg::Odometry::SharedPtr msg);
+        virtual void odom_callback(nav_msgs::msg::Odometry::SharedPtr msg);
         void cmd_callback(geometry_msgs::msg::Twist::SharedPtr msg);
         void lookupTransform() override;
         void sensorFusion() override;
