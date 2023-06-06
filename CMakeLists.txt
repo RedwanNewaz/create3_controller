@@ -139,3 +139,25 @@ install(DIRECTORY launch
 install(DIRECTORY config
 		DESTINATION share/${PROJECT_NAME})
 
+
+
+
+target_include_directories(create3_state_estimator PUBLIC
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+		$<INSTALL_INTERFACE:include>)
+target_compile_features(create3_state_estimator PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+install(TARGETS create3_state_estimator DESTINATION lib/${PROJECT_NAME})
+
+target_include_directories(dwa_controller PUBLIC
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+		$<INSTALL_INTERFACE:include>)
+target_compile_features(dwa_controller PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+install(TARGETS dwa_controller DESTINATION lib/${PROJECT_NAME})
+
+target_include_directories(simple_controller PUBLIC
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+		$<INSTALL_INTERFACE:include>)
+target_compile_features(simple_controller PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+install(TARGETS simple_controller DESTINATION lib/${PROJECT_NAME})
+
+
