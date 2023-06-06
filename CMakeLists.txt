@@ -91,7 +91,9 @@ target_link_libraries(simple_controller create3_model create3_view)
 
 
 # build dwa controller
-find_package(yaml-cpp REQUIRED)
+#find_package(yaml-cpp REQUIRED)
+include(cmake/CPM.cmake)
+CPMAddPackage("gh:jbeder/yaml-cpp#yaml-cpp-0.6.3@0.6.3")
 include_directories(${yaml-cpp_INCLUDE_DIRS})
 add_executable(dwa_controller src/dwa_controller_node.cpp
 		${PROJECT_SOURCE_DIR}/controller/manager.h
@@ -159,5 +161,12 @@ target_include_directories(simple_controller PUBLIC
 		$<INSTALL_INTERFACE:include>)
 target_compile_features(simple_controller PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 install(TARGETS simple_controller DESTINATION lib/${PROJECT_NAME})
+
+
+target_include_directories(gazebo_controller PUBLIC
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+		$<INSTALL_INTERFACE:include>)
+target_compile_features(gazebo_controller PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+install(TARGETS gazebo_controller DESTINATION lib/${PROJECT_NAME})
 
 
