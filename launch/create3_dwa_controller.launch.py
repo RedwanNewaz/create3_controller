@@ -30,6 +30,7 @@ def generate_launch_description():
     create3_dwa_controller = Node(
         package='create3_controller',
         executable='dwa_controller',
+        namespace='ac31',
         name='create3_dwa_controller',
         # arguments=['--ros-args',
         #            '-p',
@@ -45,6 +46,10 @@ def generate_launch_description():
              }
         ],
         output='screen',
+          # disable this line if not using rviz to send goal 
+        remappings=[
+            ('/ac31/goal_pose', '/goal_pose')
+        ]
     )
 
     create3_rviz = Node(
