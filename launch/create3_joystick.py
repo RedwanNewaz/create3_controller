@@ -8,11 +8,13 @@ def generate_launch_description():
     joy_node = Node(
         name='joy_node',
         package="joy",
+        namespace='ac31',
         executable="joy_node"
     )
 
     teleop_node = Node(
         name = 'teleop_node',
+        namespace='ac31',
         package = "teleop_twist_joy",
         executable="teleop_node"
     )

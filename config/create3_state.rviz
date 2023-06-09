@@ -57,14 +57,15 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        {}
+        robot: true
+        traj: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /ekf/apriltag/viz
+        Value: /ac31/ekf/apriltag/viz
       Value: true
     - Class: rviz_default_plugins/Image
       Enabled: true
@@ -98,7 +99,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /dwa_create3
+        Value: /ac31/dwa_create3
       Value: true
   Enabled: true
   Global Options:
@@ -145,7 +146,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 0
+      Angle: -6.332993507385254e-08
       Class: rviz_default_plugins/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549

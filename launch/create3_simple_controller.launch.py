@@ -27,15 +27,21 @@ def generate_launch_description():
     create3_joystick = IncludeLaunchDescription(PythonLaunchDescriptionSource([PathJoinSubstitution(
         [current_pkg_dir, 'launch', 'create3_joystick.py'])]))
     # --ros-args -p control:="/home/roboticslab/colcon_ws/src/create3_controller/config/dwa_param.yaml" -p sensor:=fusion
+    # ac31 autonomous create3 robot 1
     create3_simple_controller = Node(
         package='create3_controller',
         executable='simple_controller',
+        namespace='ac31',
         name='create3_simple_controller',
         parameters=[
             {'sensor' : 'fusion',
              'robotTag': 'tag36h11:7',
              'logOutput' : "/var/tmp"
              }
+        ],
+        # disable this line if not using rviz to send goal 
+        remappings=[
+            ('/ac31/goal_pose', '/goal_pose')
         ],
         output='screen',
     )
