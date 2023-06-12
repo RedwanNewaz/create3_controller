@@ -1,0 +1,11 @@
+version: '3'
+services:
+  ros2-humble-create3:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: ros2-humble-create3:3.0
+    network_mode: "host"
+    volumes:
+      - ./runner.sh:/runner.sh
+    command: /runner.sh
