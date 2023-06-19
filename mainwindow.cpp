@@ -33,6 +33,9 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("create3_controller_gui");
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
 
+    // set process flag false
+    isStarted = false;
+
 
 
 
@@ -73,23 +76,60 @@ void MainWindow::on_deleteButton_clicked()
 
 void MainWindow::on_dockButton_clicked()
 {
-    qDebug() << "[+] docking := " << getRobotName();
-    auto cmds = opt.getSysCmds("dock", getRobotName());
+    auto robotName = getRobotName();
+    qDebug() << "[+] docking := " << robotName;
+
+    auto cmds = (robotName.isEmpty())? opt.getSysCmds("dock") :opt.getSysCmds("dock", getRobotName());
 
     qDebug() << cmds;
+    startProc(cmds);
 }
 
 void MainWindow::on_undockButton_clicked()
 {
+    auto robotName = getRobotName();
     qDebug() << "[+] undocking := " << getRobotName();
-    auto cmds = opt.getSysCmds("undock", getRobotName());
+//    auto cmds = opt.getSysCmds("undock", getRobotName());
+    auto cmds = (robotName.isEmpty())? opt.getSysCmds("undock") :opt.getSysCmds("undock", getRobotName());
+
     qDebug() << cmds;
+    startProc(cmds);
 }
 
 void MainWindow::on_startButton_clicked()
 {
     auto cmd = controllerCmds.at(getControllerIndex()) + getRobotName();
-    qDebug() << "[+] start := " << cmd;
+    auto cmds = cmd.split(" ");
+    qDebug() << "[+] start := " << cmds;
+    // start process
+    isStarted = !isStarted;
+    //disable other buttons
+    if(isStarted)
+    {
+        //start process
+        startProc(cmds);
+
+        // change options
+        ui->dockButton->setDisabled(true);
+        ui->undockButton->setDisabled(true);
+        ui->widget->setDisabled(true);
+        ui->startButton->setText("STOP");
+    }
+    else
+    {
+        // stop process
+        proc->terminate();
+        delete proc;
+        //change option
+        ui->dockButton->setDisabled(false);
+        ui->undockButton->setDisabled(false);
+        ui->widget->setDisabled(false);
+        ui->startButton->setText("Start");
+
+    }
+
+
+
 }
 
 int MainWindow::getControllerIndex() const
@@ -105,4 +145,12 @@ int MainWindow::getControllerIndex() const
 QString MainWindow::getRobotName() const
 {
     return ui->comboBox->currentText();
+}
+
+void MainWindow::startProc(QStringList &cmds)
+{
+    proc = new QProcess(this);
+    QString proc_base = cmds.front();
+    cmds.pop_front();
+    proc->start(proc_base, cmds);
 }

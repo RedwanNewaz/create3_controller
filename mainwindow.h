@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QRadioButton>
+#include <QProcess>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -62,6 +63,14 @@ public:
         QStringList cmds = cmd.split(" ");
         cmds[insertIndex] = "/" + name + cmds[insertIndex];
         return cmds;
+    }
+
+    QStringList getSysCmds(const QString& arg)
+    {
+        auto cand = getItem("system");
+        auto dock = cand.value(arg).toVariant().toMap();
+        auto cmd = dock["cmd"].toString();
+        return cmd.split(" ");
     }
 
     QStringList getControllerNames()
@@ -128,6 +137,11 @@ private:
     ProgramOptions opt;
     QVector<QRadioButton*>controllerList;
     QStringList controllerCmds;
+    bool isStarted;
+    QProcess *proc;
+
+protected:
+    void startProc(QStringList& cmds);
 
 };
 #endif // MAINWINDOW_H
