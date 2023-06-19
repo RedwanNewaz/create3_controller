@@ -1,0 +1,33 @@
+{
+    "system":
+    {
+        "dock":
+        {
+            "cmd": "ros2 action send_goal /dock irobot_create_msgs/action/DockServo \"{}\"",
+            "argIndex": "3" 
+        }, 
+        "undock":
+        {
+            "cmd": "ros2 action send_goal /undock irobot_create_msgs/action/Undock \"{}\"",
+            "argIndex": "3"  
+        }
+    },
+    "controller":
+    {
+        "joy":
+        {
+            "cmd": "ros2 launch create3_controller create3_joystick.py",
+            "argIndex": "-1"
+        },
+        "pid":
+        {
+            "cmd": "ros2 launch create3_controller create_simple_controller.launch.py",
+            "argIndex": "-1" 
+        }, 
+        "dwa":
+        {
+            "cmd": "ros2 launch create3_controller controller_dev.launch.py",
+            "argIndex": "-1" 
+        }
+    }
+}

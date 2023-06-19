@@ -122,7 +122,7 @@ add_executable(gazebo_controller src/gazebo_sim_node.cpp
 target_link_libraries(gazebo_controller create3_model create3_view yaml-cpp)
 
 
-add_subdirectory(view/gui)
+add_subdirectory(view/GUI)
 
 install(DIRECTORY launch
         DESTINATION share/${PROJECT_NAME})
