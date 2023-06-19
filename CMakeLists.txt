@@ -121,10 +121,6 @@ add_executable(gazebo_controller src/gazebo_sim_node.cpp
 		)
 target_link_libraries(gazebo_controller create3_model create3_view yaml-cpp)
 
-find_package(HRVO REQUIRED)
-include_directories(/usr/local/include/HRVO)
-add_executable(multi_robot_gazebo_sim src/multirobot_gazebo_sim_node.cpp)
-target_link_libraries(multi_robot_gazebo_sim create3_model create3_view yaml-cpp -lHRVO)
 
 add_subdirectory(view/gui)
 
@@ -176,10 +172,20 @@ target_include_directories(gazebo_controller PUBLIC
 target_compile_features(gazebo_controller PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 install(TARGETS gazebo_controller DESTINATION lib/${PROJECT_NAME})
 
-target_include_directories(multi_robot_gazebo_sim PUBLIC
-		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-		$<INSTALL_INTERFACE:include>)
-target_compile_features(multi_robot_gazebo_sim PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-install(TARGETS gazebo_controller DESTINATION lib/${PROJECT_NAME})
+
+
+# multi-robot control 
+option(MULTIROBOT "Enable multirobot Build Option" OFF)
+if(MULTIROBOT)
+	find_package(HRVO REQUIRED)
+	include_directories(/usr/local/include/HRVO)
+	add_executable(multi_robot_gazebo_sim src/multirobot_gazebo_sim_node.cpp)
+	target_link_libraries(multi_robot_gazebo_sim create3_model create3_view yaml-cpp -lHRVO)
+	target_include_directories(multi_robot_gazebo_sim PUBLIC
+			$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+			$<INSTALL_INTERFACE:include>)
+	target_compile_features(multi_robot_gazebo_sim PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+	install(TARGETS gazebo_controller DESTINATION lib/${PROJECT_NAME})
+endif()
 
 
