@@ -12,7 +12,18 @@ namespace model
     {
     public:
         GazeboStateEstimator(const std::string &nodeName) : JointStateEstimator(nodeName),
-                                                                                _isInitialized(false) {}
+                                                                                _isInitialized(false), topicName_("odom") {}
+
+        GazeboStateEstimator(const std::string &nodeName, const std::string& topicName) : JointStateEstimator(nodeName),
+                                                            _isInitialized(false), topicName_(topicName) {
+            odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(topicName, qos, std::bind(
+                    &GazeboStateEstimator::odom_callback, this, std::placeholders::_1)
+            );
+            std::string pubTopic = topicName + "/filtered";
+            odom_pub_ = this->create_publisher<nav_msgs::msg::Odometry>(pubTopic, 10);
+
+
+        }
 
         bool isInitialized() override {
             return _isInitialized;
@@ -25,7 +36,7 @@ namespace model
     protected:
         void odom_callback(nav_msgs::msg::Odometry::SharedPtr msg) override
         {
-//            RCLCPP_INFO(get_logger(), "odom callback received");
+            RCLCPP_INFO_STREAM(get_logger(), topicName_);
             auto getYaw = [](const tf2::Quaternion& q)
             {
                 double roll, pitch, yaw;
@@ -50,11 +61,19 @@ namespace model
 
             _current.setRotation(q);
             _isInitialized = true;
+
+            nav_msgs::msg::Odometry odom;
+            tf_to_odom(_current, odom);
+            odom_pub_->publish(odom);
+
         }
 
     private:
         bool _isInitialized;
+        std::string topicName_;
         tf2::Transform _current;
+        rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
+        rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
     };
 
 

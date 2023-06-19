@@ -1,3 +1,6 @@
 [submodule "ThirdParty/yaml-cpp"]
 	path = ThirdParty/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "ThirdParty/HRVO"]
+	path = ThirdParty/HRVO
+	url = https://github.com/snape/HRVO.git

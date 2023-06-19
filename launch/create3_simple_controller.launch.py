@@ -17,8 +17,14 @@ from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 import os
 
+ARGUMENTS = [
+    DeclareLaunchArgument('namespace', default_value='',
+                          description='Robot namespace'),
+]
+
 def generate_launch_description():
     current_pkg_dir = get_package_share_directory("create3_controller")
+    namespace = LaunchConfiguration('namespace')
 
     # ros2 launch create3_controller create3_apriltag.launch.py
     create3_apriltag = IncludeLaunchDescription(PythonLaunchDescriptionSource([PathJoinSubstitution(
@@ -31,7 +37,7 @@ def generate_launch_description():
     create3_simple_controller = Node(
         package='create3_controller',
         executable='simple_controller',
-        namespace='ac31',
+        namespace=namespace,
         name='create3_simple_controller',
         parameters=[
             {'sensor' : 'fusion',
@@ -41,7 +47,7 @@ def generate_launch_description():
         ],
         # disable this line if not using rviz to send goal 
         remappings=[
-            ('/ac31/goal_pose', '/goal_pose')
+            ('/%s/goal_pose'%namespace, '/goal_pose')
         ],
         output='screen',
     )
@@ -54,7 +60,7 @@ def generate_launch_description():
         output='screen',
     )
 
-    ld = LaunchDescription()
+    ld = LaunchDescription(ARGUMENTS)
 
     ld.add_action(create3_apriltag)
     ld.add_action(create3_joystick)
