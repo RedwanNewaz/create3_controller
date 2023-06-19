@@ -21,12 +21,12 @@
         },
         "pid":
         {
-            "cmd": "ros2 launch create3_controller create_simple_controller.launch.py",
+            "cmd": "ros2 launch create3_controller create3_simple_controller.launch.py",
             "argIndex": "-1" 
         }, 
         "dwa":
         {
-            "cmd": "ros2 launch create3_controller controller_dev.launch.py",
+            "cmd": "ros2 launch create3_controller create3_dwa_controller.launch.py",
             "argIndex": "-1" 
         }
     }

@@ -31,7 +31,9 @@ def generate_launch_description():
         [current_pkg_dir, 'launch', 'create3_apriltag.launch.py'])]))
 
     create3_joystick = IncludeLaunchDescription(PythonLaunchDescriptionSource([PathJoinSubstitution(
-        [current_pkg_dir, 'launch', 'create3_joystick.py'])]))
+        [current_pkg_dir, 'launch', 'create3_joystick.py'])]),
+        launch_arguments={'namespace': namespace}.items()
+        )
     # --ros-args -p control:="/home/roboticslab/colcon_ws/src/create3_controller/config/dwa_param.yaml" -p sensor:=fusion
     # ac31 autonomous create3 robot 1
     create3_simple_controller = Node(

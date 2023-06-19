@@ -112,7 +112,7 @@ void MainWindow::on_startButton_clicked()
     auto robotName = getRobotName();
     auto cmd = controllerCmds.at(getControllerIndex());
     if (!robotName.isEmpty())
-        cmd += "namespace:=" + robotName;
+        cmd += " namespace:=" + robotName;
     auto cmds = cmd.split(" ");
     qDebug() << "[+] start := " << cmds;
     // start process
