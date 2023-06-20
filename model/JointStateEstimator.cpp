@@ -36,6 +36,12 @@ JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEst
     toFrameRel = this->get_parameter("robotTag").get_parameter_value().get<std::string>();
 
     RCLCPP_INFO(this->get_logger(), "%s State Estimator Initialized!!", estimatorType_.c_str());
+    RCLCPP_INFO_STREAM(this->get_logger(), "[subscribed topic] odom " << odom_sub_->get_topic_name());
+    RCLCPP_INFO_STREAM(this->get_logger(), "[subscribed topic] cmd_vel " << cmd_sub_->get_topic_name());
+
+
+
+
     ekf_ = std::make_unique<filter::EKF>(1.0 / 200); // 200 Hz
 
     // enable logger
@@ -107,10 +113,10 @@ void JointStateEstimator::lookupTransform()
         fusedData_->updateStatus[APRILTAG] = true;
 
     } catch (const tf2::TransformException & ex) {
-//            RCLCPP_INFO(
-//                    this->get_logger(), "Could not transform %s to %s: %s",
-//                    toFrameRel.c_str(), fromFrameRel.c_str(), ex.what());
-//            return;
+           RCLCPP_INFO(
+                   this->get_logger(), "Could not transform %s to %s: %s",
+                   toFrameRel.c_str(), fromFrameRel.c_str(), ex.what());
+           return;
     }
 
     // generate consensus using sensor fusion algorithm

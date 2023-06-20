@@ -7,13 +7,14 @@ using namespace view;
 
 StateViz::StateViz(const std::string& nodeName, const std::string& frameName):Node(nodeName), frameName_(frameName)
 {
-    create3_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("/ac31/odom/filtered", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
+    create3_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("ekf/odom", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
         state_callback(msg, RED);});
 
-    create3_state_sub2_ = this->create_subscription<nav_msgs::msg::Odometry>("/ac32/odom/filtered", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
+    // multirobot gazebo simulation we need two more robots
+    create3_state_sub2_ = this->create_subscription<nav_msgs::msg::Odometry>("/ac31/odom/filtered", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
         state_callback(msg, DEFAULT);});
 
-    create3_state_sub3_ = this->create_subscription<nav_msgs::msg::Odometry>("odometry/filtered", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
+    create3_state_sub3_ = this->create_subscription<nav_msgs::msg::Odometry>("/ac32/odom/filtered", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
         state_callback(msg, GREEN);});
 
     create3_state_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("ekf/apriltag/viz", 10);

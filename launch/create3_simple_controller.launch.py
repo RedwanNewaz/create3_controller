@@ -22,6 +22,11 @@ ARGUMENTS = [
                           description='Robot namespace'),
 ]
 
+TAG_MAP = {
+    'ac31' : 'tag36h11:7',
+    'ac32' : 'tag36h11:32'
+}
+
 def generate_launch_description():
     current_pkg_dir = get_package_share_directory("create3_controller")
     namespace = LaunchConfiguration('namespace')
@@ -34,6 +39,7 @@ def generate_launch_description():
         [current_pkg_dir, 'launch', 'create3_joystick.py'])]),
         launch_arguments={'namespace': namespace}.items()
         )
+
     # --ros-args -p control:="/home/roboticslab/colcon_ws/src/create3_controller/config/dwa_param.yaml" -p sensor:=fusion
     # ac31 autonomous create3 robot 1
     create3_simple_controller = Node(
@@ -43,14 +49,15 @@ def generate_launch_description():
         name='create3_simple_controller',
         parameters=[
             {'sensor' : 'fusion',
-             'robotTag': 'tag36h11:7',
+             'robotTag': TAG_MAP.get(namespace, 'tag36h11:7'),
              'logOutput' : "/var/tmp"
              }
         ],
         # disable this line if not using rviz to send goal 
-        remappings=[
-            ('/%s/goal_pose'%namespace, '/goal_pose')
-        ],
+        # remappings=[
+        #     ('/%s/goal_pose'%namespace, '/goal_pose'),
+        #     # ('/odom', '/%s/odom'%namespace),
+        # ],
         output='screen',
     )
 

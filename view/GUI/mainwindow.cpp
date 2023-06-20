@@ -131,9 +131,16 @@ void MainWindow::on_startButton_clicked()
     }
     else
     {
-        // stop process
-        proc->terminate();
+
+        do{
+            proc->terminate();
+            proc->waitForFinished(3000);
+            qDebug() << "process state " << proc->state();
+
+        }while(proc->state() == QProcess::Running);
+
         delete proc;
+        
         //change option
         ui->dockButton->setDisabled(false);
         ui->undockButton->setDisabled(false);
