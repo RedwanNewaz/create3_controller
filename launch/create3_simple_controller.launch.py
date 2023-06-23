@@ -41,6 +41,7 @@ def generate_launch_description():
         )
 
     # --ros-args -p control:="/home/roboticslab/colcon_ws/src/create3_controller/config/dwa_param.yaml" -p sensor:=fusion
+    print(namespace)
     # ac31 autonomous create3 robot 1
     create3_simple_controller = Node(
         package='create3_controller',
@@ -49,7 +50,7 @@ def generate_launch_description():
         name='create3_simple_controller',
         parameters=[
             {'sensor' : 'fusion',
-             'robotTag': TAG_MAP.get(namespace, 'tag36h11:7'),
+             'robotTag': TAG_MAP.get(namespace, 'tag36h11:32'),
              'logOutput' : "/var/tmp"
              }
         ],
