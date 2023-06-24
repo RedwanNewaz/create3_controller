@@ -6,7 +6,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 set(CMAKE_CXX_STANDARD 17)
 cmake_policy(SET CMP0009 NEW)
-add_compile_options(-Wno-dev)
 
 # find dependencies
 find_package(ament_cmake REQUIRED)

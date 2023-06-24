@@ -23,8 +23,8 @@ ARGUMENTS = [
 ]
 
 TAG_MAP = {
-    'ac31' : 'tag36h11:7',
-    'ac32' : 'tag36h11:32'
+    '/ac31' : 'tag36h11:7',
+    '/ac32' : 'tag36h11:32'
 }
 
 def generate_launch_description():

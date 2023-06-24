@@ -13,7 +13,7 @@ cfg_36h11 = {
     "max_hamming": 0,
     "z_up": True,
     "detector": {"threads" : 12, "sharpening": 0.25},
-    "tag": {"ids" : [7]}
+    "tag": {"ids" : [7, 32]}
 }
 
 

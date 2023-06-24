@@ -10,7 +10,7 @@ int main(int argc, char ** argv)
 {
     rclcpp::init(argc, argv);
     std::string param =  (argc > 1) ? argv[1] : "";
-
+    std::this_thread::sleep_for(5s);
 
     auto stateEstimator = std::make_shared<model::GazeboStateEstimator> ("gazeboStateEstimator");
     auto stateViz = std::make_shared<view::ControllerViz>("controllerViz", "odom");

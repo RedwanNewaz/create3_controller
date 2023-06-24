@@ -22,48 +22,34 @@ import os
 
 def generate_launch_description():
     current_pkg_dir = get_package_share_directory("create3_controller")
-    pkg_create3_common_bringup = get_package_share_directory('irobot_create_common_bringup')
     pkg_create3_gazebo_bringup = get_package_share_directory('irobot_create_gazebo_bringup')
+    gazebo_sim_launch_file = PathJoinSubstitution(
+        [pkg_create3_gazebo_bringup, 'launch', 'create3_gazebo.launch.py'])
+    create3_gazebo = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([gazebo_sim_launch_file]),
+        launch_arguments={'use_gazebo_gui': 'false'}.items()
+    )
 
 
 
-    # --ros-args -p control:="/home/roboticslab/colcon_ws/src/create3_controller/config/dwa_param.yaml" -p sensor:=fusion
-    # --ros-args __ns:=/ac31
-    # ac31 autonomous create3 robot 1
-    # create3_simple_controller = Node(
-    #     package='create3_controller',
-    #     executable='gazebo_controller',
-    #     namespace='ac31',
-    #     name='gazebo_simple_controller_1',
-    #     # parameters=[
-    #     #     {'sensor' : 'fusion',
-    #     #      'robotTag': 'tag36h11:7',
-    #     #      'logOutput' : "/var/tmp"
-    #     #      }
-    #     # ],
-    #     # disable this line if not using rviz to send goal 
-    #     # remappings=[
-    #     #     ('/ac31/goal_pose', '/goal_pose')
-    #     # ],
-    #     output='screen',
-    # )
+    create3_controller_gui = Node(
+        package='create3_controller',
+        executable='create3_controller_gui',
+        name='create3_controller_gui'
+    )
 
-    create3_simple_controller = Node(
+    create3_gazebo_simple_controller = Node(
         package='create3_controller',
         executable='gazebo_controller',
-        name='gazebo_simple_controller230',
-   
-        # disable this line if not using rviz to send goal 
-        remappings=[
-            ('odom', '/ac31/odom'),
-            ('cmd_vel', '/ac31/cmd_vel'),
-        ],
-        output='screen',
+        name='create3_gazebo_simple_controller',
+        output='screen'
     )
     
 
     ld = LaunchDescription()
-    ld.add_action(create3_simple_controller)
+    ld.add_action(create3_gazebo)
+    ld.add_action(create3_controller_gui)
+    ld.add_action(create3_gazebo_simple_controller)
 
 
     return ld
