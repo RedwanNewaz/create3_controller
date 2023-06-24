@@ -8,9 +8,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     model = new QStringListModel(this);
 
-    QStringList list;
-    list << "ac31" << "ac32";
-    model->setStringList(list);
+    // utilize qsetting to populate listView
+    settings = new QSettings("create3_controller", "gui");
+
+    QStringList robotNames = settings->value("robotNames", QStringList()).toStringList();
+
+    model->setStringList(robotNames);
 
     ui->listView->setModel(model);
     ui->comboBox->setModel(model);
@@ -35,17 +38,29 @@ MainWindow::MainWindow(QWidget *parent)
 
     // set process flag false
     isStarted = false;
-
-
-
-
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+    if(thread->isRunning())
+    {
+        qDebug() << "[+] quitting thread";
+        thread->quit();
+    }
+    // get all the items from ui's listView
+    QStringList allElements;
+    for (int i = 0; i < model->rowCount(); ++i) {
+        QModelIndex index = model->index(i, 0);
+        QString element = model->data(index, Qt::DisplayRole).toString();
+        allElements << element;
+    }
+    qDebug() << allElements;
+    settings->setValue("robotNames", allElements);
+
+    delete settings;
     delete model;
-//    delete config;
+    delete ui;
+
 }
 
 
@@ -81,8 +96,8 @@ void MainWindow::on_dockButton_clicked()
 
     auto cmds = (robotName.isEmpty())? opt.getSysCmds("dock") :opt.getSysCmds("dock", getRobotName());
 
-    qDebug() << cmds;
-    startProc(cmds);
+//    qDebug() << cmds;
+    startProc(cmds, "DOCK_BUTTON");
 }
 
 void MainWindow::on_undockButton_clicked()
@@ -92,23 +107,24 @@ void MainWindow::on_undockButton_clicked()
 //    auto cmds = opt.getSysCmds("undock", getRobotName());
     auto cmds = (robotName.isEmpty())? opt.getSysCmds("undock") :opt.getSysCmds("undock", getRobotName());
 
-    qDebug() << cmds;
-    startProc(cmds);
+//    qDebug() << cmds;
+    startProc(cmds, "UNDOCK_BUTTON");
 }
 
 void MainWindow::on_startButton_clicked()
 {
-    auto cmd = controllerCmds.at(getControllerIndex()) + getRobotName();
-    auto cmds = cmd.split(" ");
-    qDebug() << "[+] start := " << cmds;
+    auto robotName = getRobotName();
+    auto cmd = controllerCmds.at(getControllerIndex());
+    if (!robotName.isEmpty())
+        cmd += " namespace:=" + robotName;
+    qDebug() << "[+] start := " << cmd;
     // start process
     isStarted = !isStarted;
     //disable other buttons
     if(isStarted)
     {
         //start process
-        startProc(cmds);
-
+        startProc(cmd, "START_BUTTON");
         // change options
         ui->dockButton->setDisabled(true);
         ui->undockButton->setDisabled(true);
@@ -117,9 +133,11 @@ void MainWindow::on_startButton_clicked()
     }
     else
     {
-        // stop process
-        proc->terminate();
-        delete proc;
+        if(thread->isRunning())
+        {
+            qDebug() << "[+] quitting start button thread";
+            thread->quit();
+        }
         //change option
         ui->dockButton->setDisabled(false);
         ui->undockButton->setDisabled(false);
@@ -127,8 +145,6 @@ void MainWindow::on_startButton_clicked()
         ui->startButton->setText("Start");
 
     }
-
-
 
 }
 
@@ -147,10 +163,35 @@ QString MainWindow::getRobotName() const
     return ui->comboBox->currentText();
 }
 
-void MainWindow::startProc(QStringList &cmds)
+
+void MainWindow::on_sendGoalButton_clicked()
 {
-    proc = new QProcess(this);
-    QString proc_base = cmds.front();
-    cmds.pop_front();
-    proc->start(proc_base, cmds);
+    auto send = ui->goalCoordText->toPlainText();
+    auto goal = send.split(",");
+    // removing white space
+    for(auto &g: goal)
+        g = g.trimmed();
+
+
+    QString cmd = "ros2 topic pub --once FIRST/goal_pose nav_msgs/msg/Odometry '{pose:{pose:{position:{x: SECOND,y: THIRD,z: 0.0}}}}'";
+
+    if(goal.size() < 2)
+        return;
+    auto robotName = getRobotName();
+    QString name = (robotName.isEmpty()) ? "/goal_pose" : "/" + robotName + "/goal_pose";
+
+
+    QStringList cmds;
+    cmds << "ros2" << "topic" << "pub" << "--once";
+    cmds <<name << "geometry_msgs/msg/PoseStamped";
+    QString payload = "{pose:{position:{x: SECOND, y: THIRD, z: 0.0}}}";
+
+//    cmd.replace("FIRST", name);
+    payload.replace("SECOND", goal[0]);
+    payload.replace("THIRD", goal[1]);
+    cmds << payload;
+//    qDebug() << "[+] sending " << cmd;
+    startProc(cmds, "SEND_GOAL");
+
+
 }
