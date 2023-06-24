@@ -12,7 +12,9 @@ namespace model
     {
     public:
         GazeboStateEstimator(const std::string &nodeName) : JointStateEstimator(nodeName),
-                                                                                _isInitialized(false), topicName_("odom") {}
+                                                                                _isInitialized(false), topicName_("odom") {
+            timer_->cancel();
+        }
 
         GazeboStateEstimator(const std::string &nodeName, const std::string& topicName) : JointStateEstimator(nodeName),
                                                             _isInitialized(false), topicName_(topicName) {
@@ -21,6 +23,8 @@ namespace model
             );
             std::string pubTopic = topicName + "/filtered";
             odom_pub_ = this->create_publisher<nav_msgs::msg::Odometry>(pubTopic, 10);
+            timer_->cancel();
+
 
 
         }
@@ -36,7 +40,7 @@ namespace model
     protected:
         void odom_callback(nav_msgs::msg::Odometry::SharedPtr msg) override
         {
-            RCLCPP_INFO_STREAM(get_logger(), topicName_);
+//            RCLCPP_INFO_STREAM(get_logger(), topicName_);
             auto getYaw = [](const tf2::Quaternion& q)
             {
                 double roll, pitch, yaw;
@@ -62,9 +66,9 @@ namespace model
             _current.setRotation(q);
             _isInitialized = true;
 
-            nav_msgs::msg::Odometry odom;
-            tf_to_odom(_current, odom);
-            odom_pub_->publish(odom);
+//            nav_msgs::msg::Odometry odom;
+//            tf_to_odom(_current, odom);
+//            odom_pub_->publish(odom);
 
         }
 

@@ -76,7 +76,9 @@ void UnicycleController::execute(const tf2::Transform &current_pose) {
 
     double vx = std::min(1.0, error);
     if (alpha > M_PI_2 || alpha < - M_PI_2)
-        vx = -vx;
+    {
+        vx = -vx * 0;
+    }
 
     double cmd_v = kpRho * vx;
     double cmd_w = kpAlpha * alpha;

@@ -76,6 +76,7 @@ namespace model
         rclcpp::Subscription<irobot_create_msgs::msg::IrIntensityVector>::SharedPtr intensity_sub_;
         std::vector<double> ir_values_;
         std::unique_ptr<filter::ComplementaryFilter> filter_;
+    protected:
         rclcpp::TimerBase::SharedPtr timer_;
     };
 }

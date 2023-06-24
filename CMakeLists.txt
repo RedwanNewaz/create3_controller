@@ -5,6 +5,8 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 set(CMAKE_CXX_STANDARD 17)
+cmake_policy(SET CMP0009 NEW)
+add_compile_options(-Wno-dev)
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
@@ -124,9 +126,6 @@ target_link_libraries(gazebo_controller create3_model create3_view yaml-cpp)
 
 add_subdirectory(view/GUI)
 
-install(DIRECTORY launch
-        DESTINATION share/${PROJECT_NAME})
-
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -136,7 +135,7 @@ ament_package()
 
 
 # install
-cmake_policy(SET CMP0009 NEW)
+#cmake_policy(SET CMP0009 NEW)
 
 install(DIRECTORY launch
 		DESTINATION share/${PROJECT_NAME})
