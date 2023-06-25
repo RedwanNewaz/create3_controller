@@ -112,7 +112,7 @@ void MainWindow::on_undockButton_clicked()
 
 void MainWindow::on_startButton_clicked()
 {
-    auto robotName = getRobotName();
+    auto robotName = getRobotName().replace("/", "");
     auto cmd = controllerCmds.at(getControllerIndex());
     if (!robotName.isEmpty())
         cmd += " namespace:=" + robotName;
