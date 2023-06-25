@@ -91,24 +91,23 @@ void MainWindow::on_deleteButton_clicked()
 
 void MainWindow::on_dockButton_clicked()
 {
+
+    QStringList args;
     auto robotName = getRobotName();
-    qDebug() << "[+] docking := " << robotName;
+    args << robotName;
+    auto gen_cmds = opt.getCLIcmd("dock");
 
-    auto cmds = (robotName.isEmpty())? opt.getSysCmds("dock") :opt.getSysCmds("dock", getRobotName());
-
-//    qDebug() << cmds;
-    startProc(cmds, "DOCK_BUTTON");
+    startProc(gen_cmds(args), "DOCK_BUTTON");
 }
 
 void MainWindow::on_undockButton_clicked()
 {
+    QStringList args;
     auto robotName = getRobotName();
-    qDebug() << "[+] undocking := " << getRobotName();
-//    auto cmds = opt.getSysCmds("undock", getRobotName());
-    auto cmds = (robotName.isEmpty())? opt.getSysCmds("undock") :opt.getSysCmds("undock", getRobotName());
+    args << robotName;
+    auto gen_cmds = opt.getCLIcmd("undock");
 
-//    qDebug() << cmds;
-    startProc(cmds, "UNDOCK_BUTTON");
+    startProc(gen_cmds(args), "UNDOCK_BUTTON");
 }
 
 void MainWindow::on_startButton_clicked()
@@ -160,7 +159,10 @@ int MainWindow::getControllerIndex() const
 
 QString MainWindow::getRobotName() const
 {
-    return ui->comboBox->currentText();
+    auto robotName = ui->comboBox->currentText();
+    if(!robotName.isEmpty())
+        robotName = "/" + robotName;
+    return robotName;
 }
 
 
@@ -168,30 +170,21 @@ void MainWindow::on_sendGoalButton_clicked()
 {
     auto send = ui->goalCoordText->toPlainText();
     auto goal = send.split(",");
+
+    QStringList args;
+
+    auto robotName = getRobotName();
+    args << robotName;
     // removing white space
     for(auto &g: goal)
+    {
         g = g.trimmed();
+        args << g;
+    }
 
+    auto gen_cmds = opt.getCLIcmd("send_goal");
 
-    QString cmd = "ros2 topic pub --once FIRST/goal_pose nav_msgs/msg/Odometry '{pose:{pose:{position:{x: SECOND,y: THIRD,z: 0.0}}}}'";
-
-    if(goal.size() < 2)
-        return;
-    auto robotName = getRobotName();
-    QString name = (robotName.isEmpty()) ? "/goal_pose" : "/" + robotName + "/goal_pose";
-
-
-    QStringList cmds;
-    cmds << "ros2" << "topic" << "pub" << "--once";
-    cmds <<name << "geometry_msgs/msg/PoseStamped";
-    QString payload = "{pose:{position:{x: SECOND, y: THIRD, z: 0.0}}}";
-
-//    cmd.replace("FIRST", name);
-    payload.replace("SECOND", goal[0]);
-    payload.replace("THIRD", goal[1]);
-    cmds << payload;
-//    qDebug() << "[+] sending " << cmd;
-    startProc(cmds, "SEND_GOAL");
+    startProc(gen_cmds(args), "SEND_GOAL");
 
 
 }
@@ -209,18 +202,14 @@ void MainWindow::on_actionwaypoints_triggered()
     csvDir = filename.replace(directory.dirName(), "");
     qDebug() << "csv_dir " << csvDir;
     settings->setValue("csvDir", csvDir);
-    //ros2 action send_goal /waypoints action_waypoints_interfaces/action/Waypoints  "{csv_path: /home/redwan/colcon_ws/src/create3_controller/test/wp_test1.csv}"
 
+
+    QStringList args;
     auto robotName = getRobotName();
-    QString name = (robotName.isEmpty()) ? "/waypoints" : "/" + robotName + "/waypoints";
+    args << robotName;
+    args << filename + directory.dirName();
 
-    QStringList cmds;
-    cmds << "ros2" << "action" << "send_goal";
-    cmds <<name << "action_waypoints_interfaces/action/Waypoints";
-
-    QString payload = "{csv_path: FIRST}";
-    payload.replace("FIRST", filename + directory.dirName());
-    cmds << payload;
-    startProc(cmds, "SEND_WAYPOINTS");
+    auto gen_cmds = opt.getCLIcmd("send_waypoints");
+    startProc( gen_cmds(args), "SEND_WAYPOINTS");
 
 }

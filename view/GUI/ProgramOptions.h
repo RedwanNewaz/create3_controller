@@ -1,6 +1,49 @@
 #ifndef PROGRAMOPTIONS_H
 #define PROGRAMOPTIONS_H
 #include <QtCore>
+#include <QRegularExpression>
+class GenCmds{
+public:
+    GenCmds(const QStringList& cmds, const QStringList& vars): m_cmds(cmds), m_vars(vars)
+    {
+        int index = 0;
+        for(const auto& str: cmds)
+        {
+            m_cmds[index].replace("\{", "{");
+            m_cmds[index].replace("\}", "}");
+            for(const auto& key: vars)
+            {
+                QRegularExpression regex(key);
+                QRegularExpressionMatch match = regex.match(str);
+                if (match.hasMatch())
+                {
+                    m_indexes.push_back(index);
+                }
+            }
+            ++index;
+        }
+    }
+
+    QStringList operator()(const QStringList& args)
+    {
+        if(args.size() != m_indexes.size())
+        {
+            qDebug() << "not valid args";
+            return m_cmds;
+        }
+        for(int i=0; i<args.size(); ++i)
+        {
+            m_cmds[m_indexes[i]].replace(m_vars[i], args[i]);
+        }
+        return m_cmds;
+    }
+
+private:
+    QVector<int> m_indexes;
+    QStringList m_cmds, m_vars;
+};
+
+
 
 class ProgramOptions
 {
@@ -43,26 +86,15 @@ public:
           return 0;
     }
 
-    QStringList getSysCmds(const QString& arg, const QString& name)
+    GenCmds getCLIcmd(const QString& key)
     {
         auto cand = getItem("system");
-        auto dock = cand.value(arg).toVariant().toMap();
-        auto cmd = dock["cmd"].toString();
-        cmd = cmd.replace( "\"", "" );
-        int insertIndex = dock["argIndex"].toInt();
-        QStringList cmds = cmd.split(" ");
-        cmds[insertIndex] = "/" + name + cmds[insertIndex];
-        return cmds;
+        auto cli = cand.value(key).toVariant().toMap();
+        auto cmd = cli["cmd"].toStringList();
+        auto vars = cli["vars"].toStringList();
+        return GenCmds(cmd, vars);
     }
 
-    QStringList getSysCmds(const QString& arg)
-    {
-        auto cand = getItem("system");
-        auto dock = cand.value(arg).toVariant().toMap();
-        auto cmd = dock["cmd"].toString();
-        cmd = cmd.replace( "\"", "" );
-        return cmd.split(" ");
-    }
 
     QStringList getControllerNames()
     {

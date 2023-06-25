@@ -2,32 +2,39 @@
     "system":
     {
         "dock":
-        {
-            "cmd": "ros2 action send_goal /dock irobot_create_msgs/action/DockServo \"{}\"",
-            "argIndex": "3" 
-        }, 
+                {
+                    "cmd": ["ros2", "action", "send_goal", "<NS>/dock", "irobot_create_msgs/action/DockServo", "\{\}"],
+                    "vars": ["<NS>"]
+                },
         "undock":
-        {
-            "cmd": "ros2 action send_goal /undock irobot_create_msgs/action/Undock \"{}\"",
-            "argIndex": "3"  
-        }
+                {
+                    "cmd": ["ros2", "action", "send_goal", "<NS>/undock", "irobot_create_msgs/action/Undock", "\{\}"],
+                    "vars": ["<NS>"]
+                },
+        "send_goal":
+                {
+                    "cmd": ["ros2", "topic", "pub", "--once", "<NS>/goal_pose", "nav_msgs/msg/Odometry", "pose:\{pose:\{position:\{x: <X_INP>, y: <Y_INP>, z: 0.0 \} \} \}"],
+                    "vars": ["<NS>", "<X_INP>", "<Y_INP>"]
+                },
+        "send_waypoints":
+              {
+                  "cmd": ["ros2", "action", "send_goal", "<NS>/waypoints", "action_waypoints_interfaces/action/Waypoints",  "\{csv_path: <INP> \}"],
+                  "vars": ["<NS>", "<INP>"]
+              }
     },
     "controller":
     {
         "joy":
         {
-            "cmd": "ros2 launch create3_controller create3_joystick.py",
-            "argIndex": "-1"
+            "cmd": "ros2 launch create3_controller create3_joystick.py"
         },
         "pid":
         {
-            "cmd": "ros2 launch create3_controller create3_simple_controller.launch.py",
-            "argIndex": "-1" 
-        }, 
+            "cmd": "ros2 launch create3_controller create3_simple_controller.launch.py"
+        },
         "dwa":
         {
-            "cmd": "ros2 launch create3_controller create3_dwa_controller.launch.py",
-            "argIndex": "-1" 
+            "cmd": "ros2 launch create3_controller create3_dwa_controller.launch.py"
         }
     }
 }
