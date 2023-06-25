@@ -168,3 +168,5 @@ namespace navigation
 }  // namespace navigation
 
 RCLCPP_COMPONENTS_REGISTER_NODE(navigation::WaypointController)
+
+//ros2 action send_goal /waypoints action_waypoints_interfaces/action/Waypoints  "{csv_path: /home/redwan/colcon_ws/src/create3_controller/test/wp_test1.csv}"
