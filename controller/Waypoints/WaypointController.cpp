@@ -119,7 +119,7 @@ namespace navigation
                 sequence.push_back(remainDist);
                 // Publish feedback
                 goal_handle->publish_feedback(feedback);
-                RCLCPP_INFO(this->get_logger(), "Publish wp %02zu feedback %lf", i + 1, remainDist);
+                RCLCPP_INFO(this->get_logger(), "Publish wp %03zu feedback %lf", i + 1, remainDist);
 
                 // let the robot minimize the far distance
                 do {
