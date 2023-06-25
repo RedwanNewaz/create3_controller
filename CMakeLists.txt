@@ -144,6 +144,7 @@ if (WAYPOINT_CONTROLLER)
 			"action_waypoints_interfaces"
 			"rclcpp"
 			"geometry_msgs"
+			"nav_msgs"
 			"rclcpp_action"
 			"rclcpp_components")
 	rclcpp_components_register_node(waypoint_controller PLUGIN "navigation::WaypointController" EXECUTABLE waypoint_action_server)

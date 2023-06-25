@@ -41,7 +41,14 @@ def generate_launch_description():
     create3_gazebo_simple_controller = Node(
         package='create3_controller',
         executable='gazebo_controller',
-        name='create3_gazebo_simple_controller',
+        name='create3_gazebo_simple_controller'
+    )
+
+    # ros2 run create3_controller waypoint_action_server
+    create3_waypoint_controller = Node(
+        package='create3_controller',
+        executable='waypoint_action_server',
+        name='create3_waypoint_action_server',
         output='screen'
     )
     
@@ -50,6 +57,7 @@ def generate_launch_description():
     ld.add_action(create3_gazebo)
     ld.add_action(create3_controller_gui)
     ld.add_action(create3_gazebo_simple_controller)
+    ld.add_action(create3_waypoint_controller)
 
 
     return ld

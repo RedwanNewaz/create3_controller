@@ -6,17 +6,27 @@
 
 namespace navigation
 {
-    class WaypointController : public rclcpp::Node
-    {
-    public:
-        using Waypoints = action_waypoints_interfaces::action::Waypoints;
-        using GoalHandleWaypoints = rclcpp_action::ServerGoalHandle<Waypoints>;
-
-        ACTION_TUTORIALS_CPP_PUBLIC
-        explicit WaypointController(const rclcpp::NodeOptions & options = rclcpp::NodeOptions())
+        WaypointController::WaypointController(const rclcpp::NodeOptions & options)
                 : Node("waypoint_action_server", options)
         {
             using namespace std::placeholders;
+            this->declare_parameter("updateFq", 0.75);
+            this->declare_parameter("pathResolution", 0.345);
+            this->declare_parameter("robotTopic", "odom");
+
+            m_updateFq = this->get_parameter("updateFq").get_parameter_value().get<double>();
+            m_resolution = this->get_parameter("pathResolution").get_parameter_value().get<double>();
+            auto robotTopic = this->get_parameter("robotTopic").get_parameter_value().get<std::string>();
+
+            m_odom_init = false;
+            obs_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(robotTopic, 10, [&]
+                (const nav_msgs::msg::Odometry::SharedPtr msg){
+                //convert odom message to waypoint
+                m_robot.x = msg->pose.pose.position.x;
+                m_robot.y = msg->pose.pose.position.y;
+                m_odom_init = true;
+            });
+
 
             this->action_server_ = rclcpp_action::create_server<Waypoints>(
                     this,
@@ -28,17 +38,7 @@ namespace navigation
             RCLCPP_INFO(this->get_logger(), "Waypoint Controller is ready");
         }
 
-    private:
-        struct point {
-            double x;
-            double y;
-        };
-        rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pub_goal_pose_;
-
-
-        rclcpp_action::Server<Waypoints>::SharedPtr action_server_;
-
-        rclcpp_action::GoalResponse handle_goal(
+        rclcpp_action::GoalResponse WaypointController::handle_goal(
                 const rclcpp_action::GoalUUID & uuid,
                 std::shared_ptr<const Waypoints::Goal> goal)
         {
@@ -47,7 +47,7 @@ namespace navigation
             return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
         }
 
-        rclcpp_action::CancelResponse handle_cancel(
+        rclcpp_action::CancelResponse WaypointController::handle_cancel(
                 const std::shared_ptr<GoalHandleWaypoints> goal_handle)
         {
             RCLCPP_INFO(this->get_logger(), "Received request to cancel goal");
@@ -55,43 +55,51 @@ namespace navigation
             return rclcpp_action::CancelResponse::ACCEPT;
         }
 
-        void handle_accepted(const std::shared_ptr<GoalHandleWaypoints> goal_handle)
+        void WaypointController::handle_accepted(const std::shared_ptr<GoalHandleWaypoints> goal_handle)
         {
             using namespace std::placeholders;
             // this needs to return quickly to avoid blocking the executor, so spin up a new thread
             std::thread{std::bind(&WaypointController::execute, this, _1), goal_handle}.detach();
         }
 
-        void execute(const std::shared_ptr<GoalHandleWaypoints> goal_handle)
+        void WaypointController::execute(const std::shared_ptr<GoalHandleWaypoints> goal_handle)
         {
             RCLCPP_INFO(this->get_logger(), "Executing goal");
 
 
             const auto goal = goal_handle->get_goal();
-//            const std::string path = "/home/redwan/colcon_ws/src/create3_controller/test/wp_test1.csv";
             const std::string path = goal->csv_path;
-
             if(!std::filesystem::exists(path))
             {
                 RCLCPP_INFO(this->get_logger(), "csv file not found!");
                 return;
             }
 
+            // read csv file values
             rapidcsv::Document doc(path, rapidcsv::LabelParams(-1, -1));
             std::vector<float> xValues = doc.GetColumn<float>(0);
             std::vector<float> yValues = doc.GetColumn<float>(1);
             int N = xValues.size();
 
+            //convert it to a path: vector of waypoints
             std::vector<point> path_points(N);
             for (int i = 0; i < N; ++i) {
                 path_points[i] = point{xValues[i], yValues[i]};
             }
-            const double resolution = 0.345; //m
-            const double updateFq = 0.75; //Hz
-            rclcpp::Rate loop_rate(updateFq);
-            auto final_path = interpolateWaypoints(path_points, resolution);
+
+            // interpolate the path based on a fixed distance
+            auto final_path = interpolateWaypoints(path_points, m_resolution);
+
             auto feedback = std::make_shared<Waypoints::Feedback>();
             auto & sequence = feedback->time_sequence;
+            rclcpp::Rate loop_rate(m_updateFq);
+
+            // wait until odom is initialized
+            while(!m_odom_init)
+            {
+                RCLCPP_INFO(this->get_logger(), "robot state (odom) is not initialized yet");
+                loop_rate.sleep();
+            }
 
 
             auto result = std::make_shared<Waypoints::Result>();
@@ -106,12 +114,19 @@ namespace navigation
                 // Update sequence
                 auto curr_wp = final_path.at(i);
                 pubMsg(curr_wp.x, curr_wp.y);
-                sequence.push_back(i);
+
+                double remainDist = curr_wp - m_robot;
+                sequence.push_back(remainDist);
                 // Publish feedback
                 goal_handle->publish_feedback(feedback);
-                RCLCPP_INFO(this->get_logger(), "Publish feedback %d", i);
+                RCLCPP_INFO(this->get_logger(), "Publish wp %02zu feedback %lf", i + 1, remainDist);
 
-                loop_rate.sleep();
+                // let the robot minimize the far distance
+                do {
+                    remainDist = curr_wp - m_robot;
+                    loop_rate.sleep();
+                }while(remainDist > 2 * m_resolution);
+
             }
 
             // Check if goal is done
@@ -123,7 +138,7 @@ namespace navigation
         }
 
         // interpolation
-        std::vector<point> interpolateWaypoints(const std::vector<point>& waypoints, double resolution) {
+        std::vector<point> WaypointController::interpolateWaypoints(const std::vector<point>& waypoints, double resolution) {
             std::vector<point> interpolatedWaypoints;
 
             // Iterate through each pair of waypoints
@@ -155,7 +170,7 @@ namespace navigation
         }
 
         // generate goal message
-        void pubMsg(double x, double y)
+        void WaypointController::pubMsg(double x, double y)
         {
             geometry_msgs::msg::PoseStamped msg;
             msg.header.stamp = this->get_clock()->now();
@@ -163,7 +178,7 @@ namespace navigation
             msg.pose.position.y = y;
             pub_goal_pose_->publish(msg);
         }
-    };  // class WaypointController
+
 
 }  // namespace navigation
 

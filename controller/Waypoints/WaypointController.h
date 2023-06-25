@@ -15,6 +15,7 @@
 #include "action_waypoints_interfaces/action/waypoints.hpp"
 #include "rapidcsv.h"
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include <nav_msgs/msg/odometry.hpp>
 
 #ifdef __cplusplus
 extern "C"
@@ -55,6 +56,54 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
+
+namespace navigation {
+    struct point {
+        double x;
+        double y;
+
+        double operator -(const point&other) const
+        {
+            double dx = this->x - other.x;
+            double dy = this->y - other.y;
+
+            return std::sqrt(dx * dx + dy * dy);
+        }
+    };
+
+    class WaypointController : public rclcpp::Node {
+    public:
+        using Waypoints = action_waypoints_interfaces::action::Waypoints;
+        using GoalHandleWaypoints = rclcpp_action::ServerGoalHandle<Waypoints>;
+        ACTION_TUTORIALS_CPP_PUBLIC
+        explicit WaypointController(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+    private:
+        rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pub_goal_pose_;
+        rclcpp_action::Server<Waypoints>::SharedPtr action_server_;
+        rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr obs_sub_;
+        double m_resolution; //m
+        double m_updateFq; //Hz
+        point m_robot;
+        bool m_odom_init;
+
+
+    protected:
+        rclcpp_action::GoalResponse handle_goal(
+                const rclcpp_action::GoalUUID & uuid,
+                std::shared_ptr<const Waypoints::Goal> goal);
+
+        rclcpp_action::CancelResponse handle_cancel(
+                const std::shared_ptr<GoalHandleWaypoints> goal_handle);
+
+        void handle_accepted(const std::shared_ptr<GoalHandleWaypoints> goal_handle);
+
+        void execute(const std::shared_ptr<GoalHandleWaypoints> goal_handle);
+
+        std::vector<point> interpolateWaypoints(const std::vector<point>& waypoints, double resolution);
+
+        void pubMsg(double x, double y);
+    };
+}
 
 
 #endif //CREATE3_CONTROLLER_WAYPOINTCONTROLLER_H

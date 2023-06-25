@@ -195,3 +195,32 @@ void MainWindow::on_sendGoalButton_clicked()
 
 
 }
+
+void MainWindow::on_actionwaypoints_triggered()
+{
+
+    QString csvDir = settings->value("csvDir").toString();
+
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open File"),
+                                                            csvDir,
+                                                            tr("CSV (*.csv)"));
+
+    QDir directory(filename);
+    csvDir = filename.replace(directory.dirName(), "");
+    qDebug() << "csv_dir " << csvDir;
+    settings->setValue("csvDir", csvDir);
+    //ros2 action send_goal /waypoints action_waypoints_interfaces/action/Waypoints  "{csv_path: /home/redwan/colcon_ws/src/create3_controller/test/wp_test1.csv}"
+
+    auto robotName = getRobotName();
+    QString name = (robotName.isEmpty()) ? "/waypoints" : "/" + robotName + "/waypoints";
+
+    QStringList cmds;
+    cmds << "ros2" << "action" << "send_goal";
+    cmds <<name << "action_waypoints_interfaces/action/Waypoints";
+
+    QString payload = "{csv_path: FIRST}";
+    payload.replace("FIRST", filename + directory.dirName());
+    cmds << payload;
+    startProc(cmds, "SEND_WAYPOINTS");
+
+}
