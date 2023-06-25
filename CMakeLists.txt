@@ -126,6 +126,39 @@ target_link_libraries(gazebo_controller create3_model create3_view yaml-cpp)
 add_subdirectory(view/GUI)
 
 
+
+option(WAYPOINT_CONTROLLER "Enable waypoint controller Build Option" ON)
+if (WAYPOINT_CONTROLLER)
+	find_package(action_waypoints_interfaces REQUIRED)
+	add_library(waypoint_controller SHARED
+			controller/Waypoints/WaypointController.cpp
+			controller/Waypoints/WaypointController.h
+			controller/Waypoints/rapidcsv.h
+			)
+	target_include_directories(waypoint_controller PRIVATE
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+			$<INSTALL_INTERFACE:include>)
+	target_compile_definitions(waypoint_controller
+			PRIVATE "WAYPOINT_CONTROLLER_CPP_BUILDING_DLL")
+	ament_target_dependencies(waypoint_controller
+			"action_waypoints_interfaces"
+			"rclcpp"
+			"geometry_msgs"
+			"rclcpp_action"
+			"rclcpp_components")
+	rclcpp_components_register_node(waypoint_controller PLUGIN "navigation::WaypointController" EXECUTABLE waypoint_action_server)
+
+	install(TARGETS
+			waypoint_controller
+			ARCHIVE DESTINATION lib
+			LIBRARY DESTINATION lib
+			RUNTIME DESTINATION bin
+			)
+	ament_export_dependencies(rosidl_default_runtime)
+endif ()
+
+
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
