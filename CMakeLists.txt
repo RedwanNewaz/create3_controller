@@ -158,6 +158,44 @@ if (WAYPOINT_CONTROLLER)
 	ament_export_dependencies(rosidl_default_runtime)
 endif ()
 
+option(MAP_SERVER "Enable map server Build Option" ON)
+if (MAP_SERVER)
+	find_package(OpenCV REQUIRED)
+	find_package(action_waypoints_interfaces REQUIRED)
+
+	include_directories(${OpenCV_INCLUDE_DIRS})
+	add_library(map_server SHARED
+			model/map/DynamicMap.cpp
+			model/map/DynamicMap.h
+			)
+	target_include_directories(map_server PRIVATE
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+			$<INSTALL_INTERFACE:include>)
+	target_compile_definitions(map_server
+			PRIVATE "MAP_SERVER_CPP_BUILDING_DLL")
+	ament_target_dependencies(map_server
+			"action_waypoints_interfaces"
+			"rclcpp"
+			"OpenCV"
+			"geometry_msgs"
+			"nav_msgs"
+			"rclcpp_action"
+			"rclcpp_components")
+	rclcpp_components_register_node(map_server PLUGIN "map_server::DynamicMap" EXECUTABLE dynamic_map_server)
+
+	install(TARGETS
+			map_server
+			ARCHIVE DESTINATION lib
+			LIBRARY DESTINATION lib
+			RUNTIME DESTINATION bin
+			)
+	ament_export_dependencies(rosidl_default_runtime)
+
+#	add_executable(map_server src/map_server_node.cpp)
+#	target_link_libraries(map_server ${OpenCV_LIBRARIES} create3_model)
+
+endif ()
+
 
 
 if(BUILD_TESTING)
