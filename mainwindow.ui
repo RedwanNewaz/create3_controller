@@ -181,8 +181,20 @@
      <height>23</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuSend">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionwaypoints"/>
+   </widget>
+   <addaction name="menuSend"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionwaypoints">
+   <property name="text">
+    <string>waypoints</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

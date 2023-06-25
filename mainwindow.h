@@ -8,6 +8,7 @@
 #include <QVBoxLayout>
 #include <QRadioButton>
 #include <memory>
+#include <QFileDialog>
 #include "ProgramOptions.h"
 #include "processmanager.h"
 
@@ -43,6 +44,8 @@ private slots:
 
 
     void on_sendGoalButton_clicked();
+
+    void on_actionwaypoints_triggered();
 
 private:
     Ui::MainWindow *ui;
