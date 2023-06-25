@@ -186,6 +186,7 @@
      <string>File</string>
     </property>
     <addaction name="actionwaypoints"/>
+    <addaction name="actionmap"/>
    </widget>
    <addaction name="menuSend"/>
   </widget>
@@ -193,6 +194,11 @@
   <action name="actionwaypoints">
    <property name="text">
     <string>waypoints</string>
+   </property>
+  </action>
+  <action name="actionmap">
+   <property name="text">
+    <string>map</string>
    </property>
   </action>
  </widget>

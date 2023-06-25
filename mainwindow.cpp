@@ -213,3 +213,26 @@ void MainWindow::on_actionwaypoints_triggered()
     startProc( gen_cmds(args), "SEND_WAYPOINTS");
 
 }
+
+void MainWindow::on_actionmap_triggered()
+{
+    QString imgDir = settings->value("imgDir").toString();
+
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open File"),
+                                                            imgDir,
+                                                            tr("IMG (*.*)"));
+
+    QDir directory(filename);
+    imgDir = filename.replace(directory.dirName(), "");
+    qDebug() << "imgDir " << imgDir;
+    settings->setValue("imgDir", imgDir);
+
+
+    QStringList args;
+    auto robotName = getRobotName();
+    args << robotName;
+    args << filename + directory.dirName();
+
+    auto gen_cmds = opt.getCLIcmd("send_map");
+    startProc( gen_cmds(args), "SEND_MAP");
+}

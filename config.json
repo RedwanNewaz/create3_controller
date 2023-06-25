@@ -20,7 +20,12 @@
               {
                   "cmd": ["ros2", "action", "send_goal", "<NS>/waypoints", "action_waypoints_interfaces/action/Waypoints",  "\{csv_path: <INP> \}"],
                   "vars": ["<NS>", "<INP>"]
-              }
+              },
+          "send_map":
+                {
+                    "cmd": ["ros2", "action", "send_goal", "<NS>/dynmap", "action_waypoints_interfaces/action/Dynmap",  "\{map_path: <INP> \}"],
+                    "vars": ["<NS>", "<INP>"]
+                }
     },
     "controller":
     {

@@ -47,6 +47,8 @@ private slots:
 
     void on_actionwaypoints_triggered();
 
+    void on_actionmap_triggered();
+
 private:
     Ui::MainWindow *ui;
     QStringListModel *model;
