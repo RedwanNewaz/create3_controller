@@ -12,14 +12,16 @@ namespace navigation
             using namespace std::placeholders;
             this->declare_parameter("updateFq", 0.75);
             this->declare_parameter("pathResolution", 0.345);
-            this->declare_parameter("robotTopic", "odom");
+            this->declare_parameter("robotTopic", "ekf/odom");
+
+
 
             m_updateFq = this->get_parameter("updateFq").get_parameter_value().get<double>();
             m_resolution = this->get_parameter("pathResolution").get_parameter_value().get<double>();
-            auto robotTopic = this->get_parameter("robotTopic").get_parameter_value().get<std::string>();
-
+            m_robotTopic = this->get_parameter("robotTopic").get_parameter_value().get<std::string>();
+            RCLCPP_INFO_STREAM(get_logger(), "[robotTopic] = " << m_robotTopic);
             m_odom_init = false;
-            obs_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(robotTopic, 10, [&]
+            obs_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(m_robotTopic, 10, [&]
                 (const nav_msgs::msg::Odometry::SharedPtr msg){
                 //convert odom message to waypoint
                 m_robot.x = msg->pose.pose.position.x;
@@ -97,7 +99,7 @@ namespace navigation
             // wait until odom is initialized
             while(!m_odom_init)
             {
-                RCLCPP_INFO(this->get_logger(), "robot state (odom) is not initialized yet");
+                RCLCPP_INFO_STREAM(this->get_logger(), "robot state (odom) is not initialized yet  " << m_robotTopic);
                 loop_rate.sleep();
             }
 

@@ -85,6 +85,7 @@ namespace navigation {
         double m_updateFq; //Hz
         point m_robot;
         bool m_odom_init;
+        std::string m_robotTopic;
 
 
     protected:

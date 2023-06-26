@@ -17,7 +17,7 @@ int main(int argc, char ** argv)
 
     rclcpp::executors::MultiThreadedExecutor executor;
     auto simpleController = std::make_shared<controller::UnicycleController>("simpleController", stateEstimator);
-    simpleController->overrideSafety(true);
+//    simpleController->overrideSafety(true);
     executor.add_node(simpleController);
     executor.add_node(stateEstimator);
     executor.add_node(controllerViz);

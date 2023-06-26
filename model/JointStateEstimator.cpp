@@ -149,6 +149,8 @@ void JointStateEstimator::sensorFusion()
 
     if(estimatorType_ == "fusion")
     {
+        if(apriltagInit_ == nullptr)
+            return;
 
         auto getYaw = [](const tf2::Quaternion& q)
         {

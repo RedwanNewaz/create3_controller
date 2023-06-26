@@ -41,7 +41,7 @@ def generate_launch_description():
         )
 
     # --ros-args -p control:="/home/roboticslab/colcon_ws/src/create3_controller/config/dwa_param.yaml" -p sensor:=fusion
-    print(namespace)
+    print(namespace, TAG_MAP.get(namespace))
     # ac31 autonomous create3 robot 1
     create3_simple_controller = Node(
         package='create3_controller',
@@ -70,11 +70,34 @@ def generate_launch_description():
         output='screen',
     )
 
+    # ros2 run create3_controller waypoint_action_server
+    create3_waypoint_controller = Node(
+        package='create3_controller',
+        executable='waypoint_action_server',
+        namespace=namespace,
+        name='create3_waypoint_action_server',
+        parameters=[
+            {'robotTopic' : 'ekf/odom' }
+        ],
+        output='screen'
+    )
+
+    #create3 map server
+    create3_map_server = Node(
+        package='create3_controller',
+        executable='dynamic_map_server',
+        name='create3_map_server',
+        output='screen'
+    )
+
     ld = LaunchDescription(ARGUMENTS)
 
     ld.add_action(create3_apriltag)
     ld.add_action(create3_joystick)
     ld.add_action(create3_simple_controller)
     ld.add_action(create3_rviz)
+
+    ld.add_action(create3_waypoint_controller)
+    ld.add_action(create3_map_server)
     return ld
 

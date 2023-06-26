@@ -13,7 +13,7 @@
                 },
         "send_goal":
                 {
-                    "cmd": ["ros2", "topic", "pub", "--once", "<NS>/goal_pose", "nav_msgs/msg/Odometry", "pose:\{pose:\{position:\{x: <X_INP>, y: <Y_INP>, z: 0.0 \} \} \}"],
+                    "cmd": ["ros2", "topic", "pub", "--once", "<NS>/goal_pose", "geometry_msgs/msg/PoseStamped", "\{pose:\{position:\{x: <X_INP>, y: <Y_INP>, z: 0.0 \} \} \}"],
                     "vars": ["<NS>", "<X_INP>", "<Y_INP>"]
                 },
         "send_waypoints":

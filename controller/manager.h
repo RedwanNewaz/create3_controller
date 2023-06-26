@@ -35,7 +35,7 @@ namespace controller
         }controlMode_;
         virtual void execute(const tf2::Transform& current_pose) = 0;
     protected:
-        const double safetyBound_ = 0.75;
+        const double safetyBound_ = 0.5;
         const long lockTimeout_ = 15;
         StatePtr stateEstimator_;
         rclcpp::TimerBase::SharedPtr timer_;
