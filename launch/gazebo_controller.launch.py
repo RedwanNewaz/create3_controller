@@ -51,6 +51,19 @@ def generate_launch_description():
         name='create3_waypoint_action_server',
         output='screen'
     )
+
+    #create3 map server
+    create3_map_server = Node(
+        package='create3_controller',
+        executable='dynamic_map_server',
+        name='create3_map_server',
+        output='screen'
+    )
+
+    # static transform odom to map
+    odom_to_map = Node(package = "tf2_ros",
+                executable = "static_transform_publisher",
+                arguments = ["0", "0", "0", "0", "0", "0", "odom", "map"])
     
 
     ld = LaunchDescription()
@@ -58,6 +71,8 @@ def generate_launch_description():
     ld.add_action(create3_controller_gui)
     ld.add_action(create3_gazebo_simple_controller)
     ld.add_action(create3_waypoint_controller)
+    ld.add_action(create3_map_server)
+    ld.add_action(odom_to_map)
 
 
     return ld
