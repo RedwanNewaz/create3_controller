@@ -20,14 +20,9 @@ find_package(rcl_interfaces REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 
-
-
-link_directories(/usr/local/lib)
-
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 find_package(Eigen3 REQUIRED)
-
 
 include_directories(
 		include
@@ -162,7 +157,6 @@ option(MAP_SERVER "Enable map server Build Option" ON)
 if (MAP_SERVER)
 	find_package(OpenCV REQUIRED)
 	find_package(action_waypoints_interfaces REQUIRED)
-
 	include_directories(${OpenCV_INCLUDE_DIRS})
 	add_library(map_server SHARED
 			model/map/DynamicMap.cpp
@@ -189,7 +183,7 @@ if (MAP_SERVER)
 			LIBRARY DESTINATION lib
 			RUNTIME DESTINATION bin
 			)
-	ament_export_dependencies(rosidl_default_runtime)
+	ament_export_dependencies(rosidl_default_runtime )
 
 #	add_executable(map_server src/map_server_node.cpp)
 #	target_link_libraries(map_server ${OpenCV_LIBRARIES} create3_model)

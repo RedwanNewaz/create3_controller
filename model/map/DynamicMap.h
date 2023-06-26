@@ -28,6 +28,7 @@ namespace map_server
         rclcpp_action::Server<Dynmap>::SharedPtr action_server_;
         rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr pub_map_;
         double m_resolution;
+        double m_offsetX, m_offsetY;
     protected:
         rclcpp_action::GoalResponse handle_goal(
                 const rclcpp_action::GoalUUID & uuid,
