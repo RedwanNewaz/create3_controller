@@ -41,7 +41,7 @@ private slots:
 
     QString getRobotName() const;
 
-
+    void selectionChanged();
 
     void on_sendGoalButton_clicked();
 

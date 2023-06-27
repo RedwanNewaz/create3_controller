@@ -32,6 +32,10 @@ MainWindow::MainWindow(QWidget *parent)
     controllerList.back()->setChecked(true);
     controllerCmds = opt.getControllerCmds();
 
+    // connect list-view selection to combobox selection
+    auto selectionModel = ui->listView->selectionModel();
+    connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &MainWindow::selectionChanged);
+
     // change window name
     setWindowTitle("create3_controller_gui");
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
@@ -235,4 +239,9 @@ void MainWindow::on_actionmap_triggered()
 
     auto gen_cmds = opt.getCLIcmd("send_map");
     startProc( gen_cmds(args), "SEND_MAP");
+}
+
+void MainWindow::selectionChanged() {
+    auto index = ui->listView->currentIndex().row();
+    ui->comboBox->setCurrentIndex(index);
 }
