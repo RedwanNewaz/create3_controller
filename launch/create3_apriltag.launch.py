@@ -18,7 +18,7 @@ cfg_36h11 = {
 
 
 def generate_launch_description():
-    current_pkg_dir = get_package_share_directory("create3_localization")
+    current_pkg_dir = get_package_share_directory("create3_controller")
     #default_ros_cam_dir = "file:///home/robo/.ros/camera_info/head_camera_nexigo_1920.yaml"
     nexigo_cam = {
         "camera_name" : 'nexigo_cam',
