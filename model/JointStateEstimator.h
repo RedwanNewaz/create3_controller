@@ -13,6 +13,7 @@
 #include "filter/EKF.h"
 #include "tf2_ros/buffer_interface.h"
 #include "LoggerCSV.h"
+#include <map>
 //https://docs.ros.org/en/foxy/How-To-Guides/Overriding-QoS-Policies-For-Recording-And-Playback.html
 //ros2 run tf2_ros static_transform_publisher 0 0 0  0 0 0 map odom
 
@@ -52,7 +53,8 @@ namespace model
         enum DATA_TYPE{
             ODOM = 0,
             APRILTAG,
-            CMD_VEL
+            CMD_VEL,
+            FUSION
         };
 
         struct FusedData{
@@ -111,6 +113,16 @@ namespace model
     private:
         LoggerCSV logger_;
         tf2::Transform robotState_;
+        std::map<std::string, DATA_TYPE> sensorType_;
+
+        std::unique_ptr<model::filter::ComplementaryFilter> lowpassFilter_;
+
+        void get_state_from_odom();
+        void get_state_from_apriltag();
+        void get_state_from_fusion();
+        double getYaw(const tf2::Quaternion& q);
+
+
     protected:
         void tf_to_odom(const tf2::Transform& t, nav_msgs::msg::Odometry& odom);
         virtual void odom_callback(nav_msgs::msg::Odometry::SharedPtr msg);

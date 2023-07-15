@@ -46,8 +46,13 @@ namespace model
             {
                 // convert tf to vector
                 auto origin = obs.getOrigin();
-                auto theta = obs.getRotation().getAngle();
-                std::vector<double> input{origin.x(), origin.y(), origin.z(), theta};
+
+                tf2::Matrix3x3 m(obs.getRotation());
+                double roll, pitch, yaw;
+                m.getRPY(roll, pitch, yaw);
+
+
+                std::vector<double> input{origin.x(), origin.y(), origin.z(), yaw};
                 std::vector<double> result;
                 update(input, result);
                 res.setOrigin(tf2::Vector3(result[0], result[1], result[2]));
