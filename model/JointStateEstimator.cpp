@@ -200,6 +200,10 @@ namespace model
     }
 
     tf2::Transform JointStateEstimator::get_state_from_odom() {
+        tf2::Transform state;
+
+        if (odomInit_ == nullptr || apriltagInit_ == nullptr)
+            return state;
 
         auto cameraToRobot = fusedData_->apriltag;
 
@@ -228,7 +232,7 @@ namespace model
             lastDiff_ = diffOdomToTag;
         origin -= lastDiff_;
 
-        tf2::Transform state;
+
         state.setOrigin(origin);
         state.setRotation(odomToRobot.getRotation());
 

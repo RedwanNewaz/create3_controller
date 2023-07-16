@@ -14,10 +14,10 @@ StateViz::StateViz(const std::string& nodeName, const std::string& frameName):No
     create3_state_sub2_ = this->create_subscription<nav_msgs::msg::Odometry>("ekf/fusion", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
         state_callback(msg, DEFAULT);});
 
-    create3_state_sub3_ = this->create_subscription<nav_msgs::msg::Odometry>("ekf/apriltagX", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
+    create3_state_sub3_ = this->create_subscription<nav_msgs::msg::Odometry>("ekf/apriltag", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
         state_callback(msg, GREEN);});
 
-    create3_state_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("ekf/apriltag/viz", 10);
+    create3_state_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("/ekf/state/viz", 10);
     timer_ = this->create_wall_timer(1s, [this] { publish_traj(); });
 }
 
@@ -32,7 +32,7 @@ void StateViz::state_callback(nav_msgs::msg::Odometry::SharedPtr msg, const COLO
     marker.type = visualization_msgs::msg::Marker::MESH_RESOURCE;
     marker.mesh_resource = "package://irobot_create_description/meshes/body_visual.dae";
     marker.id = static_cast<int>(color);
-    marker.ns = "robot";
+    marker.ns = get_namespace();
     marker.scale.x = marker.scale.y = marker.scale.z = 1.0; // arrow scale 0.2 roomba scale 1.0
     switch (color) {
         case RED: marker.color.r = 1; break;
