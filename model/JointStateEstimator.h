@@ -13,6 +13,7 @@
 #include "filter/EKF.h"
 #include "tf2_ros/buffer_interface.h"
 #include "LoggerCSV.h"
+#include "apriltag_msgs/msg/april_tag_detection_array.hpp"
 #include <map>
 //https://docs.ros.org/en/foxy/How-To-Guides/Overriding-QoS-Policies-For-Recording-And-Playback.html
 //ros2 run tf2_ros static_transform_publisher 0 0 0  0 0 0 map odom
@@ -42,6 +43,7 @@ namespace model
     private:
         rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
         rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_sub_;
+        rclcpp::Subscription<apriltag_msgs::msg::AprilTagDetectionArray>::SharedPtr tag_sub_;
 
         const std::string fromFrameRel = "camera";
         std::string toFrameRel;
@@ -116,6 +118,8 @@ namespace model
         tf2::Vector3 lastDiff_;
         rclcpp::Time last_transform_;
         std::map<std::string, DATA_TYPE> sensorType_;
+        int apriltagCounter_;
+
 
         std::unique_ptr<model::filter::ComplementaryFilter> lowpassFilter_;
 

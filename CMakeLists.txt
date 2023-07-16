@@ -14,6 +14,7 @@ find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(irobot_create_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
+find_package(apriltag_msgs REQUIRED)
 # uncomment the following section in order to fill in
 
 find_package(rcl_interfaces REQUIRED)
@@ -37,6 +38,7 @@ include_directories(
 		${rcl_interfaces_INCLUDE_DIRS}
 		${tf2_INCLUDE_DIRS}
 		${tf2_ros_INCLUDE_DIRS}
+		${apriltag_msgs_INCLUDE_DIRS}
         )
 
 
@@ -60,6 +62,7 @@ target_link_libraries(create3_model
 		${irobot_create_msgs_LIBRARIES}
 		${nav_msgs_LIBRARIES}
 		${tf2_ros_LIBRARIES}
+		${apriltag_msgs_LIBRARIES}
 		Eigen3::Eigen
 		)
 
@@ -214,6 +217,7 @@ install(DIRECTORY config
 target_include_directories(create3_state_estimator PUBLIC
 		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
 		$<INSTALL_INTERFACE:include>)
+
 target_compile_features(create3_state_estimator PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 install(TARGETS create3_state_estimator DESTINATION lib/${PROJECT_NAME})
 

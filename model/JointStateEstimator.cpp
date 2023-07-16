@@ -20,6 +20,15 @@ JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEst
     cmd_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos   , std::bind(
             &JointStateEstimator::cmd_callback, this, std::placeholders::_1)
     );
+
+    apriltagCounter_ = 0;
+    tag_sub_ = this->create_subscription<apriltag_msgs::msg::AprilTagDetectionArray>("/detections", qos, [&]
+            (apriltag_msgs::msg::AprilTagDetectionArray::SharedPtr msg){
+        apriltagCounter_++;
+        RCLCPP_INFO_STREAM(get_logger(), "apriltagCounter_ " << apriltagCounter_);
+        fusedData_->updateStatus[APRILTAG] = apriltagCounter_ >= 10;
+    });
+
     // prepare for transformation
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -90,6 +99,9 @@ void JointStateEstimator::odom_callback(nav_msgs::msg::Odometry::SharedPtr msg)
                     msg->pose.pose.orientation.w
     );
 
+    double yaw = getYaw(q);
+    q.setRPY(0, 0, yaw);
+
     fusedData_->odom.setRotation(q);
     fusedData_->odomTwsit = msg->twist.twist;
     fusedData_->updateStatus[ODOM] = true;
@@ -105,7 +117,7 @@ void JointStateEstimator::lookupTransform()
                 fromFrameRel, toFrameRel,
                 tf2::TimePointZero);
 //        auto t = tf_buffer_->lookupTransform(                fromFrameRel, toFrameRel,
-//                get_clock()->now(), rclcpp::Duration::from_seconds(1));
+//                get_clock()->now(), rclcpp::Duration::from_seconds(0.2));
 
         current.setOrigin(tf2::Vector3(-t.transform.translation.y,
                                                     -t.transform.translation.x,
@@ -123,29 +135,15 @@ void JointStateEstimator::lookupTransform()
         m.getRPY(roll, pitch, yaw);
 
         tf2::Quaternion q;
-
-
-
-        rclcpp::Time current_time = t.header.stamp;
-        if(apriltagInit_ == nullptr)
-            last_transform_ = current_time;
-        rclcpp::Duration dt =  current_time - last_transform_;
-        RCLCPP_INFO_STREAM(get_logger(), "sec " << dt.seconds());
-        last_transform_ = current_time;
-
-
-
         q.setRPY(roll, pitch + M_PI, 3 * M_PI_2 - yaw);
-
         current.setRotation(q);
+        lowpassFilter_->update(current, fusedData_->apriltag );
 
-        fusedData_->apriltag = current;
-        fusedData_->updateStatus[APRILTAG] = dt.seconds() == 0;
 
     } catch (const tf2::TransformException & ex) {
-           RCLCPP_INFO(
-                   this->get_logger(), "Could not transform %s to %s: %s",
-                   toFrameRel.c_str(), fromFrameRel.c_str(), ex.what());
+//           RCLCPP_INFO(
+//                   this->get_logger(), "Could not transform %s to %s: %s",
+//                   toFrameRel.c_str(), fromFrameRel.c_str(), ex.what());
            return;
     }
 
@@ -172,7 +170,7 @@ void JointStateEstimator::sensorFusion()
 {
     if(odomInit_ == nullptr || apriltagInit_ == nullptr )
     {
-        RCLCPP_ERROR(get_logger(), "Sensors are not initialized yet");
+//        RCLCPP_ERROR(get_logger(), "Sensors are not initialized yet");
         return;
     }
 
@@ -203,6 +201,9 @@ void JointStateEstimator::sensorFusion()
 
 void JointStateEstimator::get_state_from_odom() {
 
+    if (!fusedData_->updateStatus[ODOM])
+        return;
+
     auto cameraToRobot = fusedData_->apriltag;
 
     auto odomToRobot = fusedData_->odom;
@@ -211,6 +212,7 @@ void JointStateEstimator::get_state_from_odom() {
 
     auto q = cameraToRobot_odom.getRotation();
     auto origin = cameraToRobot_odom.getOrigin() - cameraToOdom.getOrigin() - odomInit_->getOrigin();
+
 
     double x = origin.y();
     double y = -origin.x();
@@ -230,15 +232,34 @@ void JointStateEstimator::get_state_from_odom() {
     origin -= lastDiff_;
 
     robotState_.setOrigin(origin);
-    robotState_.setRotation(q);
+    robotState_.setRotation(odomToRobot.getRotation());
+
+    nav_msgs::msg::Odometry odom;
+    tf_to_odom(robotState_, odom);
+    odom.header.stamp = get_clock()->now();
+    odom.header.frame_id = "map";
+    ekf_odom_pub_->publish(odom);
+
 
 }
 
 void JointStateEstimator::get_state_from_apriltag() {
 
-    lowpassFilter_->update(fusedData_->apriltag, robotState_);
-    auto diffApriltag = robotState_.getOrigin() - fusedData_->apriltag.getOrigin();
-    RCLCPP_INFO(get_logger(), "driftApriltag(x, y) = (%lf, %lf) ", diffApriltag.x(), diffApriltag.y());
+    if(!fusedData_->updateStatus[APRILTAG])
+        return;
+
+    robotState_ = fusedData_->apriltag;
+
+//    lowpassFilter_->update(fusedData_->apriltag, robotState_);
+//    auto diffApriltag = robotState_.getOrigin() - fusedData_->apriltag.getOrigin();
+//    RCLCPP_INFO(get_logger(), "driftApriltag(x, y) = (%lf, %lf) ", diffApriltag.x(), diffApriltag.y());
+
+    nav_msgs::msg::Odometry apriltag;
+    tf_to_odom(robotState_, apriltag);
+    apriltag.header.stamp = get_clock()->now();
+    apriltag.header.frame_id = "map";
+    ekf_apriltag_pub_->publish(apriltag);
+
 }
 
 void JointStateEstimator::get_state_from_fusion() {
@@ -254,15 +275,10 @@ void JointStateEstimator::get_state_from_fusion() {
     if (fusedData_->updateStatus[APRILTAG])
     {
         get_state_from_apriltag();
-//        if(initUpdate)
-//            setTransform(apriltagInit_, robotState_);
+        if(initUpdate)
+            setTransform(apriltagInit_, robotState_);
 
-        nav_msgs::msg::Odometry apriltag;
-        tf_to_odom(robotState_, apriltag);
-        apriltag.header.stamp = get_clock()->now();
-        apriltag.header.frame_id = "map";
-        ekf_apriltag_pub_->publish(apriltag);
-        fusedData_->updateStatus[APRILTAG] = false;
+
 
     }
 //# fuse odom + cmd_vel
@@ -270,15 +286,8 @@ void JointStateEstimator::get_state_from_fusion() {
     {
         get_state_from_odom();
 
-//        if(initUpdate)
-//            setTransform(odomInit_, robotState_);
-
-        nav_msgs::msg::Odometry odom;
-        tf_to_odom(robotState_, odom);
-        odom.header.stamp = get_clock()->now();
-        odom.header.frame_id = "map";
-        ekf_odom_pub_->publish(odom);
-        fusedData_->updateStatus[ODOM] = false;
+        if(initUpdate)
+            setTransform(odomInit_, robotState_);
 
     }
 
