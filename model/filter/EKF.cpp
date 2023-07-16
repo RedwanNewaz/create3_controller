@@ -93,8 +93,8 @@ void EKF::update(const tf2::Transform &obs, const geometry_msgs::msg::Twist& cmd
     m.getRPY(roll, pitch, theta);
 
     double w = cmd.angular.z;
-    double v = sqrt(cmd.linear.x * cmd.linear.x + cmd.linear.y * cmd.linear.y );
-
+//    double v = sqrt(cmd.linear.x * cmd.linear.x + cmd.linear.y * cmd.linear.y );
+    double v = cmd.linear.x ;
 
     if(!initialized)
     {
@@ -121,21 +121,34 @@ EKF::EKF(const double dt) : DT(dt)
 {
     initialized = false;
 
-    PEst = Eigen::Matrix4f::Identity();
+    PEst = Eigen::Matrix4f::Identity() * 0.1;
 
-    // Motional model covariance
+//    // Motional model covariance
     Q = Eigen::Matrix4f::Identity();
     Q(0,0)=0.1 * 0.05;
     Q(1,1)=0.1 * 0.05;
     Q(2,2)= (1.0/180 * M_PI);
 //    Q(2,2)= 0.01 * 0.005;;
     Q(3,3)=0.1 * 0.05;
+//
+//    // observation model covariance
+//    R = Eigen::Matrix3f::Identity();
+//    R(0,0)=2.050;
+//    R(1,1)=2.050;
+////    R(2,2)=10.050;
 
-    // observation model covariance
-    R = Eigen::Matrix3f::Identity();
-    R(0,0)=2.050;
-    R(1,1)=2.050;
-//    R(2,2)=10.050;
+// Motional model covariance
+//    Eigen::Matrix4f Q = Eigen::Matrix4f::Identity();
+//    Q(0,0)=0.1 * 0.1;
+//    Q(1,1)=0.1 * 0.1;
+//    Q(2,2)=(1.0/180 * M_PI) * (1.0/180 * M_PI);
+//    Q(3,3)=0.1 * 0.1;
+
+    // Observation model covariance
+    Eigen::Matrix2f  R = Eigen::Matrix2f::Identity();
+    R(0,0)=1.0;
+    R(1,1)=1.0;
+
 }
 
 

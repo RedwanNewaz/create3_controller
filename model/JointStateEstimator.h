@@ -113,6 +113,8 @@ namespace model
     private:
         LoggerCSV logger_;
         tf2::Transform robotState_;
+        tf2::Vector3 lastDiff_;
+        rclcpp::Time last_transform_;
         std::map<std::string, DATA_TYPE> sensorType_;
 
         std::unique_ptr<model::filter::ComplementaryFilter> lowpassFilter_;

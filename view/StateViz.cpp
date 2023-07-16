@@ -11,10 +11,10 @@ StateViz::StateViz(const std::string& nodeName, const std::string& frameName):No
         state_callback(msg, RED);});
 
     // multirobot gazebo simulation we need two more robots
-    create3_state_sub2_ = this->create_subscription<nav_msgs::msg::Odometry>("/ac31/odom/filtered", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
+    create3_state_sub2_ = this->create_subscription<nav_msgs::msg::Odometry>("ekf/fusion", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
         state_callback(msg, DEFAULT);});
 
-    create3_state_sub3_ = this->create_subscription<nav_msgs::msg::Odometry>("/ac32/odom/filtered", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
+    create3_state_sub3_ = this->create_subscription<nav_msgs::msg::Odometry>("ekf/apriltag", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
         state_callback(msg, GREEN);});
 
     create3_state_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("ekf/apriltag/viz", 10);
@@ -46,7 +46,8 @@ void StateViz::state_callback(nav_msgs::msg::Odometry::SharedPtr msg, const COLO
 
     create3_state_pub_->publish(marker);
     // show traj
-    pubData_[color].push_back(marker.pose.position);
+    if(color == DEFAULT)
+        pubData_[color].push_back(marker.pose.position);
 
 }
 
@@ -66,7 +67,8 @@ void StateViz::publish_traj()
     trajMarker.type = visualization_msgs::msg::Marker::SPHERE_LIST;
     trajMarker.ns = "traj";
     trajMarker.color.r = 1;
+    trajMarker.color.g = 1;
     trajMarker.color.a = 0.7;
-    trajMarker.scale.x = trajMarker.scale.y = trajMarker.scale.z = 0.1;
+    trajMarker.scale.x = trajMarker.scale.y = trajMarker.scale.z = 0.05;
     create3_state_pub_->publish(trajMarker);
 }
