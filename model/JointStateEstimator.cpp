@@ -12,6 +12,7 @@ JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEst
 {
     this->declare_parameter("sensor", "odom");
     this->declare_parameter("robotTag", "tag36h11:7");
+    this->declare_parameter("tagTopic", "/detections");
     this->declare_parameter("logOutput", "/var/tmp");
     // collect all the sensor and control information: (i) odom (ii) apriltag tf, and (iii) cmd_vel
     odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("odom", qos, std::bind(
@@ -20,9 +21,9 @@ JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEst
     cmd_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos   , std::bind(
             &JointStateEstimator::cmd_callback, this, std::placeholders::_1)
     );
-
+    auto tagTopic =  this->get_parameter("tagTopic").get_parameter_value().get<std::string>();
     apriltagCounter_ = 0;
-    tag_sub_ = this->create_subscription<apriltag_msgs::msg::AprilTagDetectionArray>("/detections", qos, [&]
+    tag_sub_ = this->create_subscription<apriltag_msgs::msg::AprilTagDetectionArray>(tagTopic, qos, [&]
             (apriltag_msgs::msg::AprilTagDetectionArray::SharedPtr msg){
         apriltagCounter_++;
         RCLCPP_INFO_STREAM(get_logger(), "apriltagCounter_ " << apriltagCounter_);
