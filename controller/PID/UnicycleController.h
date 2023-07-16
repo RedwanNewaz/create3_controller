@@ -5,6 +5,7 @@
 #ifndef CREATE3_CONTROLLER_UNICYCLECONTROLLER_H
 #define CREATE3_CONTROLLER_UNICYCLECONTROLLER_H
 #include "../manager.h"
+#include "../Waypoints/WaypointController.h"
 
 namespace controller
 {
@@ -12,6 +13,7 @@ namespace controller
 
     public:
         UnicycleController(const rclcpp::NodeOptions& options);
+        virtual ~UnicycleController();
         static tf2::Transform poseToTransform(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
 
     private:

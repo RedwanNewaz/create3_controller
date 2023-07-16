@@ -14,7 +14,8 @@ namespace model
         ODOM = 0,
         APRILTAG,
         CMD_VEL,
-        FUSION
+        FUSION,
+        SIM
     };
 
     struct FusedData{

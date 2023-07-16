@@ -8,10 +8,11 @@ using namespace controller;
 manager::manager(const rclcpp::NodeOptions& options):
 Node("create3_controller")
 {
+    this->declare_parameter("safetyOverlook", true);
     cmd_vel_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel",1);
     timer_ = this->create_wall_timer(30ms, std::bind(&manager::control_loop, this));
     controlMode_ = JOY_TELEOP;
-    safetyOverlook_ = false;
+    safetyOverlook_ =  this->get_parameter("safetyOverlook").get_parameter_value().get<bool>();
 
     // sensor fusion happens using dual EKF with robot localization package
     // check out the config/dual_ekf.yaml file for the topic and configuraiton

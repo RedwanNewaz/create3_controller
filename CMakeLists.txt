@@ -21,6 +21,7 @@ find_package(visualization_msgs REQUIRED)
 find_package(apriltag_msgs REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(Threads REQUIRED)
+find_package(action_waypoints_interfaces REQUIRED)
 # uncomment the following section in order to fill in
 
 find_package(rcl_interfaces REQUIRED)
@@ -45,6 +46,7 @@ include_directories(
 		${tf2_INCLUDE_DIRS}
 		${tf2_ros_INCLUDE_DIRS}
 		${apriltag_msgs_INCLUDE_DIRS}
+		${action_waypoints_interfaces_INCLUDE_DIRS}
         )
 
 

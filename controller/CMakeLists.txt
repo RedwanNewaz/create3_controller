@@ -1,48 +1,37 @@
-option(SIMPLE_CONTROLLER "Enable Simple PID controller Build Option" ON)
+#option(SIMPLE_CONTROLLER "Enable Simple PID controller Build Option" ON)
 option(DWA_CONTROLLER "Enable DWA controller Build Option" OFF)
 option(GAZEBO_CONTROLLER "Enable Gazebo controller Build Option" OFF)
 option(WAYPOINT_CONTROLLER "Enable waypoint controller Build Option" ON)
 option(MULTIROBOT "Enable multirobot Build Option" OFF)
 
 
-#if(SIMPLE_CONTROLLER)
-#    add_library(SimpleController
-#            ${PROJECT_SOURCE_DIR}/controller/manager.h
-#            ${PROJECT_SOURCE_DIR}/controller/manager.cpp
-#            ${PROJECT_SOURCE_DIR}/controller/PID/UnicycleController.h
-#            ${PROJECT_SOURCE_DIR}/controller/PID/UnicycleController.cpp
-#            )
-#    # build simple controller
-#    add_executable(simple_controller ${PROJECT_SOURCE_DIR}/src/simple_controller_node.cpp )
-#    target_link_libraries(SimpleController create3_model)
-#    target_link_libraries(simple_controller SimpleController)
-#
-#    target_include_directories(simple_controller PUBLIC
-#            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-#            $<INSTALL_INTERFACE:include>)
-#    target_compile_features(simple_controller PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-#    install(TARGETS simple_controller DESTINATION lib/${PROJECT_NAME})
-#endif ()
-
-
-add_library(SimpleController
+add_library(SimpleController SHARED
         ${PROJECT_SOURCE_DIR}/controller/manager.h
         ${PROJECT_SOURCE_DIR}/controller/manager.cpp
         ${PROJECT_SOURCE_DIR}/controller/PID/UnicycleController.h
         ${PROJECT_SOURCE_DIR}/controller/PID/UnicycleController.cpp
         )
-# build simple controller
-add_executable(simple_controller ${PROJECT_SOURCE_DIR}/src/simple_controller_node.cpp )
 target_link_libraries(SimpleController StateEstimator)
-target_link_libraries(simple_controller SimpleController)
-
-target_include_directories(simple_controller PUBLIC
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+target_include_directories(SimpleController PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
-target_compile_features(simple_controller PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-install(TARGETS simple_controller DESTINATION lib/${PROJECT_NAME})
+target_compile_definitions(SimpleController
+        PRIVATE "SimpleController_CPP_BUILDING_DLL")
+ament_target_dependencies(SimpleController
+        "rclcpp"
+        "geometry_msgs"
+        "nav_msgs"
+        "rclcpp_action"
+        "rclcpp_components")
+rclcpp_components_register_node(SimpleController PLUGIN "controller::UnicycleController" EXECUTABLE SimpleController_node)
 
-
+install(TARGETS
+        SimpleController
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin
+        )
+ament_export_dependencies(rosidl_default_runtime )
 
 
 
@@ -72,28 +61,7 @@ if (DWA_CONTROLLER)
     install(TARGETS dwa_controller DESTINATION lib/${PROJECT_NAME})
 endif ()
 
-if (GAZEBO_CONTROLLER)
-    add_library(GazeboController
-            ${PROJECT_SOURCE_DIR}/controller/manager.h
-            ${PROJECT_SOURCE_DIR}/controller/manager.cpp
-            ${PROJECT_SOURCE_DIR}/model/GazeboStateEstimator.h
-            ${PROJECT_SOURCE_DIR}/controller/DWA/dwa_planner.h
-            ${PROJECT_SOURCE_DIR}/controller/DWA/dwa_planner.cpp
-            ${PROJECT_SOURCE_DIR}/controller/DWA/dwa_planner_ros.h
-            ${PROJECT_SOURCE_DIR}/controller/DWA/dwa_planner_ros.cpp
-            ${PROJECT_SOURCE_DIR}/include/utilities/param_manager2.h
-            ${PROJECT_SOURCE_DIR}/controller/PID/UnicycleController.h
-            ${PROJECT_SOURCE_DIR}/controller/PID/UnicycleController.cpp
-            )
 
-    add_executable(gazebo_controller src/gazebo_sim_node.cpp)
-    target_link_libraries(gazebo_controller GazeboController yaml-cpp)
-    target_include_directories(gazebo_controller PUBLIC
-            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-            $<INSTALL_INTERFACE:include>)
-    target_compile_features(gazebo_controller PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-    install(TARGETS gazebo_controller DESTINATION lib/${PROJECT_NAME})
-endif ()
 
 
 if (WAYPOINT_CONTROLLER)

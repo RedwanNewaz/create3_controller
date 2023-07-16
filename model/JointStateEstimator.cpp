@@ -61,6 +61,7 @@ namespace model
         sensorType_["odom"] = ODOM;
         sensorType_["apriltag"] = APRILTAG;
         sensorType_["fusion"] = FUSION;
+        sensorType_["sim"] = SIM;
 
 
         ekf_ = std::make_unique<filter::EKF>(1.0 / 200); // 200 Hz
@@ -166,18 +167,29 @@ namespace model
 
     void JointStateEstimator::sensorFusion()
     {
-        if(odomInit_ == nullptr || apriltagInit_ == nullptr )
-        {
-//        RCLCPP_ERROR(get_logger(), "Sensors are not initialized yet");
-            return;
-        }
-
         //check for suitable algorithm found
         if(sensorType_.find(estimatorType_) == sensorType_.end())
         {
             RCLCPP_ERROR(get_logger(), "No algorithm found for your input argument");
             return;
         }
+        if(sensorType_[estimatorType_] == SIM)
+        {
+            nav_msgs::msg::Odometry odom;
+            tf_to_odom(fusedData_->odom, odom);
+            odom.header.stamp = get_clock()->now();
+            odom.header.frame_id = "odom";
+            ekf_odom_pub_->publish(odom);
+        }
+
+
+        if(odomInit_ == nullptr || apriltagInit_ == nullptr )
+        {
+//        RCLCPP_ERROR(get_logger(), "Sensors are not initialized yet");
+            return;
+        }
+
+
 
         switch (sensorType_[estimatorType_]) {
             case APRILTAG:
@@ -306,7 +318,5 @@ namespace model
 
 
 
-#ifndef GAZEBO_SIM
 #include "rclcpp_components/register_node_macro.hpp"
 RCLCPP_COMPONENTS_REGISTER_NODE(model::JointStateEstimator)
-#endif
