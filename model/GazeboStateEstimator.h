@@ -11,12 +11,12 @@ namespace model
     class GazeboStateEstimator: public JointStateEstimator
     {
     public:
-        GazeboStateEstimator(const std::string &nodeName) : JointStateEstimator(nodeName),
+        GazeboStateEstimator(const rclcpp::NodeOptions& options) : JointStateEstimator(options),
                                                                                 _isInitialized(false), topicName_("odom") {
             timer_->cancel();
         }
 
-        GazeboStateEstimator(const std::string &nodeName, const std::string& topicName) : JointStateEstimator(nodeName),
+        GazeboStateEstimator(const rclcpp::NodeOptions& options, const std::string& topicName) : JointStateEstimator(options),
                                                             _isInitialized(false), topicName_(topicName) {
             odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(topicName, qos, std::bind(
                     &GazeboStateEstimator::odom_callback, this, std::placeholders::_1)
@@ -82,4 +82,8 @@ namespace model
 
 
 }
+#ifdef GAZEBO_SIM
+    RCLCPP_COMPONENTS_REGISTER_NODE(model::GazeboStateEstimator)
+#endif
+
 #endif //CREATE3_CONTROLLER_GAZEBOSTATEESTIMATOR_H

@@ -22,7 +22,7 @@ namespace controller
 
     class dwa_planner_ros: public manager, public DynamicWindow::planner{
     public:
-        explicit dwa_planner_ros(StatePtr stateEstimator);
+        explicit dwa_planner_ros(const rclcpp::NodeOptions& options);
 
 
     protected:

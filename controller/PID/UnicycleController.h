@@ -11,7 +11,7 @@ namespace controller
     class UnicycleController: public manager {
 
     public:
-        UnicycleController(const std::string &nodeName, const StatePtr &stateEstimator);
+        UnicycleController(const rclcpp::NodeOptions& options);
         static tf2::Transform poseToTransform(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
 
     private:

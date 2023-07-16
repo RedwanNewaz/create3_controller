@@ -6,7 +6,7 @@
 
 using namespace controller;
 
-dwa_planner_ros::dwa_planner_ros(StatePtr stateEstimator):manager("DWA", stateEstimator) {
+dwa_planner_ros::dwa_planner_ros(const rclcpp::NodeOptions& options):manager(options) {
     initialized_ = false;
     this->declare_parameter("control", "dwa_param.yaml");
 
@@ -164,3 +164,6 @@ tf2::Transform dwa_planner_ros::poseToTransform(const geometry_msgs::msg::PoseSt
     pose.setRotation(q);
     return pose;
 }
+
+
+RCLCPP_COMPONENTS_REGISTER_NODE(controller::dwa_planner_ros)

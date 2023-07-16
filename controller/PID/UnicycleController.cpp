@@ -5,8 +5,8 @@
 #include "UnicycleController.h"
 using namespace controller;
 
-UnicycleController::UnicycleController(const std::string &nodeName, const manager::StatePtr &stateEstimator)
-        : manager(nodeName, stateEstimator) {
+UnicycleController::UnicycleController(const rclcpp::NodeOptions& options)
+        : manager(options) {
     initialized_ = false;
     goal_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>("goal_pose", 10, std::bind(
             &UnicycleController::set_goal_callback, this, std::placeholders::_1)
@@ -96,3 +96,6 @@ void UnicycleController::execute(const tf2::Transform &current_pose) {
     publish_cmd(cmd_v, cmd_w);
 
 }
+
+
+RCLCPP_COMPONENTS_REGISTER_NODE(controller::UnicycleController)

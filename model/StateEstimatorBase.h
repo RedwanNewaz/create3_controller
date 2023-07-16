@@ -21,7 +21,7 @@ namespace model
     class StateEstimatorBase: public rclcpp::Node
     {
     public:
-        StateEstimatorBase(const std::string &nodeName) : Node(nodeName)
+        StateEstimatorBase(const rclcpp::NodeOptions& options) : Node("StateEstimator", options)
         {
             intensity_sub_ = this->create_subscription<irobot_create_msgs::msg::IrIntensityVector>("ir_intensity", qos, std::bind(
                     &StateEstimatorBase::intensity_callback, this, std::placeholders::_1)

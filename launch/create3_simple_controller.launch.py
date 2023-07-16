@@ -51,7 +51,8 @@ def generate_launch_description():
         parameters=[
             {'sensor' : 'fusion',
              'robotTag': TAG_MAP.get(namespace, 'tag36h11:32'),
-             'logOutput' : "/var/tmp"
+             'logOutput' : "/var/tmp",
+             'tagTopic' : "/apriltag/detections"
              }
         ],
         # disable this line if not using rviz to send goal 
