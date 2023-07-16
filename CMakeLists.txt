@@ -53,7 +53,7 @@ set(create3_model_SRC_FILES
 		${PROJECT_SOURCE_DIR}/model/JointStateEstimator.cpp
 		${PROJECT_SOURCE_DIR}/model/JointStateEstimator.h
 		${PROJECT_SOURCE_DIR}/include/utilities/LoggerCSV.h
-		${PROJECT_SOURCE_DIR}/model/GazeboStateEstimator.h)
+		${PROJECT_SOURCE_DIR}/model/GazeboStateEstimator.h include/utilities/FusedData.h)
 
 add_library(create3_model ${create3_model_SRC_FILES})
 target_link_libraries(create3_model
@@ -210,7 +210,6 @@ install(DIRECTORY launch
 
 install(DIRECTORY config
 		DESTINATION share/${PROJECT_NAME})
-
 
 
 

@@ -152,8 +152,8 @@ ekf_filter_node_fusion:
     odom0_differential: false
     odom0_relative: false
 
-#    odom0_pose_rejection_threshold: 5.0
-#    odom0_twist_rejection_threshold: 1.0
+    odom0_pose_rejection_threshold: 5.0
+    odom0_twist_rejection_threshold: 1.0
 
     odom1: ekf/odom/filtered
     odom1_config: [ true,  true,  false,
@@ -165,8 +165,8 @@ ekf_filter_node_fusion:
     odom1_nodelay: true
     odom1_differential: false
     odom1_relative: false
-#    odom1_pose_rejection_threshold: 5.0
-#    odom1_twist_rejection_threshold: 1.0
+    odom1_pose_rejection_threshold: 5.0
+    odom1_twist_rejection_threshold: 1.0
 
     use_control: true
 

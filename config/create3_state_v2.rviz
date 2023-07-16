@@ -58,7 +58,8 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        {}
+        robot: true
+        traj: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -177,7 +178,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 161.92666625976562
+      Scale: 70.96058654785156
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz_default_plugins)
       X: -0.5213618874549866

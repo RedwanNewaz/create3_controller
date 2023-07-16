@@ -10,7 +10,7 @@ class CameraInfoPublisher(Node):
         super().__init__('camera_info_publisher')
         self.publisher_ = self.create_publisher(CameraInfo, '/camera/camera_info', 10)
         self.timer_ = self.create_timer(0.001, self.publish_camera_info)
-        with open('head_camera_nexigo_1920.yaml') as file:
+        with open('../config/head_camera_nexigo_1920.yaml') as file:
             self.yaml_data = yaml.safe_load(file)
         self.subscription_ = self.create_subscription(
             Image,

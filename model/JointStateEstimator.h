@@ -11,6 +11,7 @@
 #include <tf2/convert.h>
 #include <nav_msgs/msg/odometry.hpp>
 #include "filter/EKF.h"
+#include "utilities/FusedData.h"
 #include "tf2_ros/buffer_interface.h"
 #include "LoggerCSV.h"
 #include "apriltag_msgs/msg/april_tag_detection_array.hpp"
@@ -41,7 +42,7 @@ namespace model
 
 
     private:
-        rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
+        rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_, fusion_sub_;
         rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_sub_;
         rclcpp::Subscription<apriltag_msgs::msg::AprilTagDetectionArray>::SharedPtr tag_sub_;
 
@@ -52,59 +53,9 @@ namespace model
         std::once_flag flagOdom_;
         rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr ekf_odom_pub_, ekf_apriltag_pub_;
         std::unique_ptr<filter::EKF> ekf_;
-        enum DATA_TYPE{
-            ODOM = 0,
-            APRILTAG,
-            CMD_VEL,
-            FUSION
-        };
-
-        struct FusedData{
-            FusedData()
-            {
-                updateStatus[ODOM] = updateStatus[APRILTAG] = updateStatus[CMD_VEL] = false;
-            }
-            tf2::Transform odom;
-            tf2::Transform apriltag;
-            geometry_msgs::msg::Twist cmd, odomTwsit;
-            std::array<bool, 3> updateStatus;
-
-            void transformToVec(const tf2::Transform& trans, std::vector<double>&res)
-            {
-                auto origin = trans.getOrigin();
-                auto q = trans.getRotation();
-
-                double x = origin.x();
-                double y = origin.y();
-                tf2::Matrix3x3 m(q);
-                double roll, pitch, yaw;
-                m.getRPY(roll, pitch, yaw);
-                double theta = fmod(yaw + M_PI, 2 * M_PI) - M_PI_2;
-                res.push_back(x);
-                res.push_back(y);
-                res.push_back(theta);
-            }
-            void twistToVec(const geometry_msgs::msg::Twist& cmd, std::vector<double>&res)
-            {
-                res.push_back(cmd.linear.x);
-                res.push_back(cmd.linear.y);
-                res.push_back(cmd.angular.z);
-            }
 
 
-            std::vector<double> getLog()
-            {
-    //            {"cam_x", "cam_y", "cam_theta", "odom_x", "odom_y", "odom_theta", "cmd_vx", "cmd_vy", "cmd_wz", "odom_vx", "odom_vy", "odom_wz"};
-                std::vector<double> result;
-                transformToVec(apriltag, result);
-                transformToVec(odom, result);
-                twistToVec(cmd, result);
-                twistToVec(odomTwsit, result);
-                return result;
 
-            }
-
-        };
 
         ///@brief variables related to tf listener
         std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
@@ -123,14 +74,15 @@ namespace model
 
         std::unique_ptr<model::filter::ComplementaryFilter> lowpassFilter_;
 
-        void get_state_from_odom();
-        void get_state_from_apriltag();
+        tf2::Transform get_state_from_odom();
+        tf2::Transform get_state_from_apriltag();
         void get_state_from_fusion();
         double getYaw(const tf2::Quaternion& q);
 
 
     protected:
         void tf_to_odom(const tf2::Transform& t, nav_msgs::msg::Odometry& odom);
+        void odom_to_tf(nav_msgs::msg::Odometry::SharedPtr odom, tf2::Transform& t);
         virtual void odom_callback(nav_msgs::msg::Odometry::SharedPtr msg);
         void cmd_callback(geometry_msgs::msg::Twist::SharedPtr msg);
         void lookupTransform() override;
