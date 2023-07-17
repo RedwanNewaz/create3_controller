@@ -48,8 +48,8 @@ MainWindow::~MainWindow()
 {
     if(thread->isRunning())
     {
-        qDebug() << "[+] quitting thread";
-        thread->quit();
+        qDebug() << "[+] terminate thread";
+        thread->terminate();
     }
     // get all the items from ui's listView
     QStringList allElements;
@@ -101,7 +101,7 @@ void MainWindow::on_dockButton_clicked()
     args << robotName;
     auto gen_cmds = opt.getCLIcmd("dock");
 
-    startProc(gen_cmds(args), "DOCK_BUTTON");
+    startProc(gen_cmds(args), "DOCK_BUTTON", CLI);
 }
 
 void MainWindow::on_undockButton_clicked()
@@ -111,7 +111,7 @@ void MainWindow::on_undockButton_clicked()
     args << robotName;
     auto gen_cmds = opt.getCLIcmd("undock");
 
-    startProc(gen_cmds(args), "UNDOCK_BUTTON");
+    startProc(gen_cmds(args), "UNDOCK_BUTTON", CLI);
 }
 
 void MainWindow::on_startButton_clicked()
@@ -127,7 +127,7 @@ void MainWindow::on_startButton_clicked()
     if(isStarted)
     {
         //start process
-        startProc(cmd, "START_BUTTON");
+        startProc(cmd.split(" "), "START_BUTTON", LAUNCH);
         // change options
         ui->dockButton->setDisabled(true);
         ui->undockButton->setDisabled(true);
@@ -136,11 +136,7 @@ void MainWindow::on_startButton_clicked()
     }
     else
     {
-        if(thread->isRunning())
-        {
-            qDebug() << "[+] quitting start button thread";
-            thread->quit();
-        }
+        stopProc();
         //change option
         ui->dockButton->setDisabled(false);
         ui->undockButton->setDisabled(false);
@@ -188,7 +184,7 @@ void MainWindow::on_sendGoalButton_clicked()
 
     auto gen_cmds = opt.getCLIcmd("send_goal");
 
-    startProc(gen_cmds(args), "SEND_GOAL");
+    startProc(gen_cmds(args), "SEND_GOAL", CLI);
 
 
 }
@@ -214,7 +210,7 @@ void MainWindow::on_actionwaypoints_triggered()
     args << filename + directory.dirName();
 
     auto gen_cmds = opt.getCLIcmd("send_waypoints");
-    startProc( gen_cmds(args), "SEND_WAYPOINTS");
+    startProc( gen_cmds(args), "SEND_WAYPOINTS", CLI);
 
 }
 
@@ -238,10 +234,46 @@ void MainWindow::on_actionmap_triggered()
     args << filename + directory.dirName();
 
     auto gen_cmds = opt.getCLIcmd("send_map");
-    startProc( gen_cmds(args), "SEND_MAP");
+    startProc( gen_cmds(args), "SEND_MAP", CLI);
 }
 
 void MainWindow::selectionChanged() {
     auto index = ui->listView->currentIndex().row();
     ui->comboBox->setCurrentIndex(index);
+}
+
+void MainWindow::startProc(const QStringList& cmd, const QString& name, const PMODE& mode)
+{
+    proc = new ProcessManager(cmd);
+    thread = new QThread;
+    thread->setObjectName(name);
+    proc->moveToThread(thread);
+    if(mode == LAUNCH)
+        connect(thread, &QThread::started, proc, &ProcessManager::run);
+    else if (mode == CLI)
+        connect(thread, &QThread::started, proc, &ProcessManager::sys);
+    thread->start();
+}
+
+void MainWindow::stopProc() {
+    if(thread->isRunning())
+    {
+        int attempt = 0;
+        do{
+            try {
+                attempt++;
+                qDebug() << "[+] attempt terminate start process thread " << attempt;
+                thread->terminate();
+                thread->wait();
+            }
+            catch (...)
+            {
+                qDebug() << "Failed attempt = " << attempt;
+            }
+        }while(thread->isRunning());
+
+        qDebug() << "[+] process terminated success";
+        delete proc;
+        delete thread;
+    }
 }

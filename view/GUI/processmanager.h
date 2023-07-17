@@ -6,6 +6,12 @@
 #include <QProcess>
 #include <memory>
 #include <QDebug>
+
+enum PMODE{
+    LAUNCH,
+    CLI
+};
+
 class ProcessManager : public QObject
 {
     Q_OBJECT
@@ -18,6 +24,7 @@ signals:
 public:
     void terminate();
     void run();
+    void sys();
 
 protected slots:
 
