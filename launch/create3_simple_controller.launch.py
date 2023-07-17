@@ -35,15 +35,9 @@ def generate_launch_description():
         robotTag = TAG_MAP.get(nameFilter(sys.argv[4]), robotTag)
 
 
-    create3_state_node = Node(
-        name='StateEstimator',
-        package='create3_controller', executable='StateEstimator_node',
-        namespace="",
-        parameters=[  {'sensor' : 'sim',
-                       'robotTag': robotTag,
-                       'logOutput' : "/var/tmp",
-                       'tagTopic' : "/apriltag/detections"
-                       }]
+    create3_state_node = IncludeLaunchDescription(PythonLaunchDescriptionSource([PathJoinSubstitution(
+        [current_pkg_dir, 'launch', 'create3_ekf.py'])]),
+        launch_arguments={'namespace': namespace}.items()
     )
 
 

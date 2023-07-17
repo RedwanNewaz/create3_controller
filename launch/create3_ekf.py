@@ -1,18 +1,9 @@
 import launch
-from launch_ros.actions import ComposableNodeContainer
-
-from launch_ros.descriptions import ComposableNode
 from launch_ros.actions import Node
-from ament_index_python.packages import get_package_share_directory
-
-from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
-from launch import LaunchDescription
 import launch_ros.actions
 import os
-import yaml
-from launch.substitutions import EnvironmentVariable
-import pathlib
+import sys
 import launch.actions
 from launch.actions import DeclareLaunchArgument
 from ament_index_python.packages import get_package_share_directory
@@ -23,18 +14,8 @@ ARGUMENTS = [
                           description='Robot namespace'),
 ]
 TAG_MAP = {
-    '/ac31' : 'tag36h11:7',
-    '/ac32' : 'tag36h11:32'
-}
-
-cfg_36h11 = {
-    "image_transport": "raw",
-    "family": "36h11",
-    "size": 0.162,
-    "max_hamming": 0,
-    "z_up": True,
-    "detector": {"threads" : 12, "sharpening": 0.25},
-    "tag": {"ids" : [7, 32]}
+    'ac31' : 'tag36h11:7',
+    'ac32' : 'tag36h11:32'
 }
 
 def generate_launch_description():
@@ -42,60 +23,26 @@ def generate_launch_description():
     create3_controller_dir = get_package_share_directory('create3_controller')
     parameters_file_path = os.path.join(create3_controller_dir, 'config', 'dual_ekf.yaml')
 
+    robotTag = 'tag36h11:32'
+    nameFilter = lambda x: x.split("=")[-1]
+    robotName = ""
+    if len(sys.argv) > 4:
+        robotName = nameFilter(sys.argv[4])
+        robotTag = TAG_MAP.get(robotName, robotTag)
 
-    # tag_node = Node(
-    #     package='apriltag_ros',
-    #     executable='apriltag_node',
-    #     namespace=namespace,
-    #     name='create3_state_estimator',
-    #     parameters=[cfg_36h11],
-    #     remappings=[
-    #         # This maps the 'raw' images for simplicity of demonstration.
-    #         # In practice, this will have to be the rectified 'rect' images.
-    #         ("/apriltag/image_rect", "/camera/image_raw"),
-    #         ("/apriltag/camera_info", "/camera/camera_info"),
-    #     ],
-    #     output='screen',
-    # )
-
-
-    # tag_node = ComposableNode(
-    #     name='apriltag_36h11',
-    #     namespace='apriltag',
-    #     package='apriltag_ros', plugin='AprilTagNode',
-    #     remappings=[
-    #         # This maps the 'raw' images for simplicity of demonstration.
-    #         # In practice, this will have to be the rectified 'rect' images.
-    #         ("/apriltag/image_rect", "/camera/image_raw"),
-    #         ("/apriltag/camera_info", "/camera/camera_info"),
-    #     ],
-    #     parameters=[cfg_36h11],
-    #     extra_arguments=[{'use_intra_process_comms': True}],
-    # )
-    #
-    #
-    # container = ComposableNodeContainer(
-    #     name='tag_container',
-    #     namespace='apriltag',
-    #     package='rclcpp_components',
-    #     executable='component_container',
-    #     composable_node_descriptions=[tag_node],
-    #     output='screen'
-    # )
-
+    print("create3_ekf.py file parsing args")
+    print(robotName, robotTag)
 
     create3_state_estimator = Node(
-        package='create3_controller',
-        executable='create3_state_estimator',
+        name='StateEstimator',
+        package='create3_controller', executable='StateEstimator_node',
         namespace=namespace,
-        name='create3_state_estimator',
-        parameters=[
-            {'sensor' : 'fusion',
-             'robotTag': TAG_MAP.get(namespace, 'tag36h11:7'),
-             'logOutput' : "/var/tmp"
-             }
-        ],
-        output='screen',
+        parameters=[  {'sensor' : 'fusion',
+                       'robotTag': robotTag,
+                       'logOutput' : "/var/tmp",
+                       'tagTopic' : "/apriltag/detections"
+                       }],
+        output='screen'
     )
 
 
@@ -103,26 +50,29 @@ def generate_launch_description():
         package='robot_localization',
         executable='ekf_node',
         name='ekf_filter_node_odom',
+        namespace=namespace,
         output='screen',
         parameters=[parameters_file_path],
-        remappings=[('odometry/filtered', 'ekf/odom/filtered')]
+        remappings=[('%s/odometry/filtered' % robotName, '%s/ekf/odom/filtered' % robotName)]
     )
     ekf_apriltag = Node(
         package='robot_localization',
         executable='ekf_node',
+        namespace=namespace,
         name='ekf_filter_node_apriltag',
         output='screen',
         parameters=[parameters_file_path],
-        remappings=[('odometry/filtered', 'ekf/apriltag/filtered')]
+        remappings=[('%s/odometry/filtered' %robotName, '%s/ekf/apriltag/filtered' % robotName)]
     )
 
     ekf_filter_node_fusion = Node(
         package='robot_localization',
         executable='ekf_node',
+        namespace=namespace,
         name='ekf_filter_node_fusion',
         output='screen',
         parameters=[parameters_file_path],
-        remappings=[('odometry/filtered', 'ekf/fusion')]
+        remappings=[('%s/odometry/filtered' % robotName, '%s/ekf/fusion' % robotName)]
     )
 
     static_transform_node = launch_ros.actions.Node(
