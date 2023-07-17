@@ -31,8 +31,10 @@ def generate_launch_description():
     # --ros-args -p control:="/home/roboticslab/colcon_ws/src/create3_controller/config/dwa_param.yaml" -p sensor:=fusion
     robotTag = 'tag36h11:32'
     nameFilter = lambda x: x.split("=")[-1]
+    robotName = ""
     if len(sys.argv) > 4:
-        robotTag = TAG_MAP.get(nameFilter(sys.argv[4]), robotTag)
+        robotName = "/" + nameFilter(sys.argv[4])
+        robotTag = TAG_MAP.get(robotName, robotTag)
 
 
     create3_state_node = IncludeLaunchDescription(PythonLaunchDescriptionSource([PathJoinSubstitution(
@@ -51,9 +53,15 @@ def generate_launch_description():
             {'sensor' : 'fusion',
              'robotTag': robotTag,
              'logOutput' : "/var/tmp",
-             'tagTopic' : "/apriltag/detections"
+             'tagTopic' : "/apriltag/detections",
+             'safetyOverlook' : False
              }
         ],
+        # remappings=[
+        #     # This maps the '/ekf/fusion' state topic for simplicity of demonstration.
+        #     # In practice, this will have to be the rectified 'rect' images.
+        #     ("%s/ekf/fusion" % robotName, "%s/ekf/apriltag" %robotName)
+        # ],
         output='screen',
     )
 

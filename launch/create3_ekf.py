@@ -46,33 +46,32 @@ def generate_launch_description():
     )
 
 
+
     ekf_odom = Node(
         package='robot_localization',
         executable='ekf_node',
         name='ekf_filter_node_odom',
-        namespace=namespace,
         output='screen',
         parameters=[parameters_file_path],
-        remappings=[('%s/odometry/filtered' % robotName, '%s/ekf/odom/filtered' % robotName)]
+        remappings=[('odometry/filtered', 'ekf/odom/filtered')]
     )
+
     ekf_apriltag = Node(
         package='robot_localization',
         executable='ekf_node',
-        namespace=namespace,
         name='ekf_filter_node_apriltag',
         output='screen',
         parameters=[parameters_file_path],
-        remappings=[('%s/odometry/filtered' %robotName, '%s/ekf/apriltag/filtered' % robotName)]
+        remappings=[('odometry/filtered', 'ekf/apriltag/filtered')]
     )
 
     ekf_filter_node_fusion = Node(
         package='robot_localization',
         executable='ekf_node',
-        namespace=namespace,
         name='ekf_filter_node_fusion',
         output='screen',
         parameters=[parameters_file_path],
-        remappings=[('%s/odometry/filtered' % robotName, '%s/ekf/fusion' % robotName)]
+        remappings=[('odometry/filtered', '%s/ekf/fusion' %robotName )]
     )
 
     static_transform_node = launch_ros.actions.Node(
@@ -82,12 +81,21 @@ def generate_launch_description():
         arguments=['0', '0', '0', '0', '0', '0', 'odom', 'map']
     )
 
+    #create3 viewer
+    create3_viewer = Node(
+        package='create3_controller',
+        executable='create3_view_node',
+        name='create3_view_node',
+        namespace=namespace
+    )
+
     ld = launch.LaunchDescription(ARGUMENTS)
     ld.add_action(static_transform_node)
     ld.add_action(create3_state_estimator)
     ld.add_action(ekf_odom)
     ld.add_action(ekf_apriltag)
     ld.add_action(ekf_filter_node_fusion)
+    ld.add_action(create3_viewer)
 
 
     return ld

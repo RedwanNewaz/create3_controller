@@ -26,12 +26,7 @@ def generate_launch_description():
         name='create3_gui_node'
     )
 
-    #create3 viewer
-    create3_viewer = Node(
-        package='create3_controller',
-        executable='create3_view_node',
-        name='create3_view_node'
-    )
+
 
     # launch rviz2
     create3_rviz = Node(
@@ -54,7 +49,7 @@ def generate_launch_description():
     ld = LaunchDescription()
     ld.add_action(create3_ui)
     ld.add_action(create3_apriltag)
-    ld.add_action(create3_viewer)
+
     ld.add_action(create3_rviz)
     ld.add_action(create3_map_server)
 
