@@ -56,7 +56,9 @@ void ProcessManager::on_process_output()
     lines.removeAll(QString(""));
     QStringListIterator it(lines);
     while(it.hasNext()){
-       qDebug() << qUtf8Printable(it.next())<< endl;
+        QString view = it.next();
+        if (!view.isEmpty())
+            qDebug() << qUtf8Printable(view)<< endl;
     }
 }
 
