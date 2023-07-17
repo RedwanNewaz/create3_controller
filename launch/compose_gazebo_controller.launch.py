@@ -42,10 +42,42 @@ def generate_launch_description():
     )
 
 
+    create3_waypoint_controller = Node(
+        package='create3_controller',
+        executable='waypoint_action_server',
+        name='create3_waypoint_action_server',
+        parameters=[
+            {'robotTopic' : '/ekf/odom' }
+        ],
+        output='screen'
+    )
+
+    #create3 map server
+    create3_map_server = Node(
+        package='create3_controller',
+        executable='dynamic_map_server',
+        name='create3_map_server',
+        output='screen'
+    )
+
+
+    #create3 viewer
+    create3_viewer = Node(
+        package='create3_controller',
+        executable='create3_view_node',
+        name='create3_view_node'
+    )
+
+
+
     ld = LaunchDescription()
     ld.add_action(state_node)
     ld.add_action(controller_node)
     ld.add_action(static_transform_node)
+    ld.add_action(create3_viewer)
+    ld.add_action(create3_waypoint_controller)
+    ld.add_action(create3_map_server)
+
 
     return ld
 

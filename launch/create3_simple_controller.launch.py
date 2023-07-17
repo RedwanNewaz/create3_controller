@@ -16,15 +16,15 @@ from launch_ros.descriptions import ComposableNode
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 import os
-
+import sys
 ARGUMENTS = [
     DeclareLaunchArgument('namespace', default_value='',
                           description='Robot namespace'),
 ]
 
 TAG_MAP = {
-    '/ac31' : 'tag36h11:7',
-    '/ac32' : 'tag36h11:32'
+    'ac31' : 'tag36h11:7',
+    'ac32' : 'tag36h11:32'
 }
 
 def generate_launch_description():
@@ -41,7 +41,10 @@ def generate_launch_description():
         )
 
     # --ros-args -p control:="/home/roboticslab/colcon_ws/src/create3_controller/config/dwa_param.yaml" -p sensor:=fusion
-    print(namespace, TAG_MAP.get(namespace))
+    robotTag = 'tag36h11:32'
+    nameFilter = lambda x: x.split("=")[-1]
+    if len(sys.argv) > 4:
+        robotTag = TAG_MAP.get(nameFilter(sys.argv[4]), robotTag)
     # ac31 autonomous create3 robot 1
     create3_simple_controller = Node(
         package='create3_controller',
@@ -50,7 +53,7 @@ def generate_launch_description():
         name='create3_simple_controller',
         parameters=[
             {'sensor' : 'fusion',
-             'robotTag': TAG_MAP.get(namespace, 'tag36h11:32'),
+             'robotTag': robotTag,
              'logOutput' : "/var/tmp",
              'tagTopic' : "/apriltag/detections"
              }
