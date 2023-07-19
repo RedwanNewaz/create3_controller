@@ -13,6 +13,7 @@ JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEst
     this->declare_parameter("sensor", "odom");
     this->declare_parameter("robotTag", "tag36h11:7");
     this->declare_parameter("logOutput", "/var/tmp");
+    this->declare_parameter("odom_heading_offset", M_PI);
     // collect all the sensor and control information: (i) odom (ii) apriltag tf, and (iii) cmd_vel
     odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("odom", qos, std::bind(
             &JointStateEstimator::odom_callback, this, std::placeholders::_1)
@@ -34,6 +35,7 @@ JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEst
 
     estimatorType_ = this->get_parameter("sensor").get_parameter_value().get<std::string>();
     toFrameRel = this->get_parameter("robotTag").get_parameter_value().get<std::string>();
+    odom_heading_offset_ = this->get_parameter("odom_heading_offset").get_parameter_value().get<double>();
 
     RCLCPP_INFO(this->get_logger(), "%s State Estimator Initialized!!", estimatorType_.c_str());
     RCLCPP_INFO_STREAM(this->get_logger(), "[subscribed topic] odom " << odom_sub_->get_topic_name());
@@ -105,8 +107,6 @@ void JointStateEstimator::lookupTransform()
         auto t = tf_buffer_->lookupTransform(
                 fromFrameRel, toFrameRel,
                 tf2::TimePointZero);
-//        t = tf_buffer_->lookupTransform(                fromFrameRel, toFrameRel,
-//                get_clock()->now(), rclcpp::Duration::from_seconds(0.1));
         current.setOrigin(tf2::Vector3(-t.transform.translation.y,
                                                     -t.transform.translation.x,
                                                     t.transform.translation.z
@@ -199,13 +199,16 @@ void JointStateEstimator::get_state_from_odom() {
     auto cameraToOdom = apriltagInit_->inverseTimes(*odomInit_);
     auto cameraToRobot_odom = cameraToOdom.inverseTimes(odomToRobot);
 
-    auto q = cameraToRobot_odom.getRotation();
     auto origin = cameraToRobot_odom.getOrigin() - cameraToOdom.getOrigin() - odomInit_->getOrigin();
 
     double x = origin.y();
     double y = -origin.x();
     origin.setX(x);
     origin.setY(y);
+
+    auto q = odomToRobot.getRotation();
+    auto yaw = getYaw(q);
+    q.setRPY(0, 0, yaw);
 
     robotState_.setOrigin(origin);
     robotState_.setRotation(q);

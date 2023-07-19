@@ -56,22 +56,15 @@ private:
     QVector<QRadioButton*>controllerList;
     QStringList controllerCmds;
     bool isStarted;
-//    ProcessManager *proc;
     QSettings *settings;
     QThread *thread;
-//    QVector<QThread*> m_threads;
+    ProcessManager *proc;
 
-protected:
-    template<typename T>
-    void startProc(const T& cmd, const QString& name)
-    {
-        auto proc = new ProcessManager(cmd);
-        thread = new QThread;
-        thread->setObjectName(name);
-        proc->moveToThread(thread);
-        connect(thread, &QThread::started, proc, &ProcessManager::run);
-        thread->start();
-    }
+
+private:
+
+    void startProc(const QStringList& cmd, const QString& name, const PMODE& mode);
+    void stopProc();
 
 
 

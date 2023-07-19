@@ -114,6 +114,7 @@ namespace model
         LoggerCSV logger_;
         tf2::Transform robotState_;
         std::map<std::string, DATA_TYPE> sensorType_;
+        double odom_heading_offset_;
 
         std::unique_ptr<model::filter::ComplementaryFilter> lowpassFilter_;
 
