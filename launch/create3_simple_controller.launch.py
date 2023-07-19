@@ -50,18 +50,18 @@ def generate_launch_description():
         namespace=namespace,
         name='create3_simple_controller',
         parameters=[
-            {'sensor' : 'fusion',
+            {'sensor' : 'odom',
              'robotTag': robotTag,
              'logOutput' : "/var/tmp",
              'tagTopic' : "/apriltag/detections",
              'safetyOverlook' : False
              }
         ],
-        # remappings=[
-        #     # This maps the '/ekf/fusion' state topic for simplicity of demonstration.
-        #     # In practice, this will have to be the rectified 'rect' images.
-        #     ("%s/ekf/fusion" % robotName, "%s/ekf/apriltag" %robotName)
-        # ],
+        remappings=[
+            # This maps the '/ekf/fusion' state topic for simplicity of demonstration.
+            # In practice, this will have to be the rectified 'rect' images.
+            ("%s/ekf/fusion" % robotName, "%s/ekf/odom" %robotName)
+        ],
         output='screen',
     )
 
@@ -73,7 +73,7 @@ def generate_launch_description():
         namespace=namespace,
         name='create3_waypoint_action_server',
         parameters=[
-            {'robotTopic' : 'ekf/odom' }
+            {'robotTopic' : '%s/ekf/odom' %robotName }
         ],
         output='screen'
     )

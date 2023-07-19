@@ -53,7 +53,9 @@ def generate_launch_description():
         name='ekf_filter_node_odom',
         output='screen',
         parameters=[parameters_file_path],
-        remappings=[('odometry/filtered', 'ekf/odom/filtered')]
+        remappings=[('odometry/filtered', 'ekf/odom/filtered'),
+                    ('/cmd_vel', '/%s/cmd_vel' % robotName)
+                    ]
     )
 
     ekf_apriltag = Node(
@@ -62,7 +64,9 @@ def generate_launch_description():
         name='ekf_filter_node_apriltag',
         output='screen',
         parameters=[parameters_file_path],
-        remappings=[('odometry/filtered', 'ekf/apriltag/filtered')]
+        remappings=[('odometry/filtered', 'ekf/apriltag/filtered'),
+                    ('/cmd_vel', '/%s/cmd_vel' % robotName)
+                    ]
     )
 
     ekf_filter_node_fusion = Node(
@@ -71,7 +75,9 @@ def generate_launch_description():
         name='ekf_filter_node_fusion',
         output='screen',
         parameters=[parameters_file_path],
-        remappings=[('odometry/filtered', '%s/ekf/fusion' %robotName )]
+        remappings=[('odometry/filtered', '%s/ekf/fusion' %robotName ),
+                    ('/cmd_vel', '/%s/cmd_vel' % robotName)
+                    ]
     )
 
     static_transform_node = launch_ros.actions.Node(
@@ -90,11 +96,11 @@ def generate_launch_description():
     )
 
     ld = launch.LaunchDescription(ARGUMENTS)
-    ld.add_action(static_transform_node)
+    # ld.add_action(static_transform_node)
     ld.add_action(create3_state_estimator)
-    ld.add_action(ekf_odom)
-    ld.add_action(ekf_apriltag)
-    ld.add_action(ekf_filter_node_fusion)
+    # ld.add_action(ekf_odom)
+    # ld.add_action(ekf_apriltag)
+    # ld.add_action(ekf_filter_node_fusion)
     ld.add_action(create3_viewer)
 
 
