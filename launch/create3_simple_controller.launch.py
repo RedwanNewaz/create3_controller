@@ -33,7 +33,7 @@ def generate_launch_description():
 
     # ros2 launch create3_controller create3_apriltag.launch.py
     create3_apriltag = IncludeLaunchDescription(PythonLaunchDescriptionSource([PathJoinSubstitution(
-        [current_pkg_dir, 'launch', 'create3_apriltag.launch.py'])]))
+        [current_pkg_dir, 'launch', 'airlab_cameras.launch.py'])]))
 
     create3_joystick = IncludeLaunchDescription(PythonLaunchDescriptionSource([PathJoinSubstitution(
         [current_pkg_dir, 'launch', 'create3_joystick.py'])]),
@@ -66,7 +66,7 @@ def generate_launch_description():
         package='rviz2',
         executable='rviz2',
         name='create3_rviz2',
-        arguments=['-d', os.path.join(current_pkg_dir, 'config/create3_state.rviz')],
+        arguments=['-d', os.path.join(current_pkg_dir, 'config/multicam.rviz')],
         output='screen',
     )
 
