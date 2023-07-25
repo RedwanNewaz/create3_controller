@@ -48,7 +48,7 @@ JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEst
 
 
     ekf_ = std::make_unique<filter::EKF>(1.0 / 200); // 200 Hz
-    lowpassFilter_ = std::make_unique<filter::ComplementaryFilter>(0.99);
+    lowpassFilter_ = std::make_unique<filter::ComplementaryFilter>(0.5);
 
 
 
@@ -107,8 +107,8 @@ void JointStateEstimator::lookupTransform()
         auto t = tf_buffer_->lookupTransform(
                 fromFrameRel, toFrameRel,
                 tf2::TimePointZero);
-        current.setOrigin(tf2::Vector3(-t.transform.translation.y,
-                                                    -t.transform.translation.x,
+        current.setOrigin(tf2::Vector3(t.transform.translation.x,
+                                                    t.transform.translation.y,
                                                     t.transform.translation.z
         ));
 
@@ -123,9 +123,9 @@ void JointStateEstimator::lookupTransform()
         m.getRPY(roll, pitch, yaw);
 
         tf2::Quaternion q;
+        q.setRPY(0, 0, yaw + M_PI);
 
-
-        q.setRPY(roll, pitch + M_PI, 3 * M_PI_2 - yaw);
+//        q.setRPY(roll, pitch + M_PI, 3 * M_PI_2 - yaw);
 
         current.setRotation(q);
 

@@ -14,7 +14,7 @@ from ament_index_python.packages import get_package_share_directory
 cfg_36h11 = {
     "image_transport": "raw",
     "family": "36h11",
-    "size": 0.162,
+    "size": 0.2, # 0.162
     "max_hamming": 0,
     "z_up": True,
     "detector": {"threads" : 12, "sharpening": 0.25},

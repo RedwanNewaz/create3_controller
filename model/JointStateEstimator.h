@@ -43,7 +43,7 @@ namespace model
         rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
         rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_sub_;
 
-        const std::string fromFrameRel = "camera";
+        const std::string fromFrameRel = "map";
         std::string toFrameRel;
         std::string estimatorType_;
         tf2::Transform *odomInit_, *apriltagInit_;
