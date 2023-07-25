@@ -54,7 +54,7 @@ def generate_launch_description():
         namespace=namespace,
         name='create3_simple_controller',
         parameters=[
-            {'sensor' : 'apriltag',
+            {'sensor' : 'odom',
              'robotTag': TAG_MAP.get(robotName, 'tag36h11:32'),
              'logOutput' : "/var/tmp"
              }

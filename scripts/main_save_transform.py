@@ -66,12 +66,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--frm", type=str, default="nexigo_cam", help="From which camera frame?")
     parser.add_argument("--to", type=str, default="tag36h11:7", help="Family name with tag id for tag")
-    parser.add_argument("--n", type=int, default=5, help="Number of samples")
+    parser.add_argument("--n", type=int, default=15, help="Number of samples")
     parser.add_argument("--save", action="store_true", help="Save result as csv file")
     parser.add_argument("-v", "--verbose", action="store_false", help="Show results?")
     args = parser.parse_args()
 
     command_to_execute = "ros2 run tf2_ros tf2_echo {} {}".format(args.frm, args.to)
+    print(command_to_execute)
 
     data = []
     for i, val in enumerate(execute_command(command_to_execute)):

@@ -48,7 +48,7 @@ JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEst
 
 
     ekf_ = std::make_unique<filter::EKF>(1.0 / 200); // 200 Hz
-    lowpassFilter_ = std::make_unique<filter::ComplementaryFilter>(0.5);
+    lowpassFilter_ = std::make_unique<filter::ComplementaryFilter>(0.85);
 
 
 
@@ -196,15 +196,21 @@ void JointStateEstimator::get_state_from_odom() {
 
     auto cameraToRobot = fusedData_->apriltag;
     auto odomToRobot = fusedData_->odom;
-    auto cameraToOdom = apriltagInit_->inverseTimes(*odomInit_);
-    auto cameraToRobot_odom = cameraToOdom.inverseTimes(odomToRobot);
+//    auto cameraToOdom = apriltagInit_->inverseTimes(*odomInit_);
+//    auto cameraToRobot_odom = cameraToOdom.inverseTimes(odomToRobot);
+//
+//    auto origin = cameraToRobot_odom.getOrigin() - cameraToOdom.getOrigin() - odomInit_->getOrigin();
 
-    auto origin = cameraToRobot_odom.getOrigin() - cameraToOdom.getOrigin() - odomInit_->getOrigin();
+    auto origin = odomToRobot.getOrigin();
+    origin = odomInit_->getOrigin() - origin;
 
     double x = origin.y();
     double y = -origin.x();
     origin.setX(x);
     origin.setY(y);
+
+    origin = origin + apriltagInit_->getOrigin();
+
 
     auto q = odomToRobot.getRotation();
     auto yaw = getYaw(q);
@@ -233,55 +239,24 @@ void JointStateEstimator::get_state_from_fusion() {
     if(apriltagInit_ == nullptr)
         return;
 
-    double cam_init_theta = getYaw(apriltagInit_->getRotation());
-    double odom_init_theta = getYaw(odomInit_->getRotation());
-
-//        double thetaInit = (cam_init_theta + odom_init_theta) / 2;
-    //TODO make thetaInit as a parameter
-    double thetaInit = M_PI / 12.0;
-    double x = fusedData_->odom.getOrigin().x();
-    double y = fusedData_->odom.getOrigin().y();
-
-    double x0 = x * cos(thetaInit) - y * sin(thetaInit);
-    double y0 = x * sin(thetaInit) + y * cos(thetaInit);
-
-    double cam_x0 = apriltagInit_->getOrigin().x();
-    double cam_y0 = apriltagInit_->getOrigin().y();
-
-    double odom_x0 = odomInit_->getOrigin().x();
-    double odom_y0 = odomInit_->getOrigin().y();
-
-    x = x0 + cam_x0 - odom_x0;
-    y = y0 + cam_y0 - odom_y0;
-
-
 
 
 //# fuse odom + cmd_vel
 
-    tf2::Transform odomEkf;
-    odomEkf.setOrigin(tf2::Vector3(x, y, 0));
-    auto q = fusedData_->odom.getRotation();
-    double theta = getYaw(q);
-    q.setRPY(0, 0, theta);
-    odomEkf.setRotation(q);
-    ekf_->update(odomEkf, fusedData_->cmd, robotState_);
+//    get_state_from_odom();
+//
+//    ekf_->update(odomEkf, fusedData_->cmd, robotState_);
 
 //# fuse cam + odom_vel
 
-    tf2::Transform camEkf;
-    double cam_x = fusedData_->apriltag.getOrigin().x();
-    double cam_y = fusedData_->apriltag.getOrigin().y();
-    camEkf.setOrigin(tf2::Vector3(cam_x, cam_y, 0));
-    // use odom orientation for yaw
-    camEkf.setRotation(q);
-    ekf_->update(robotState_, fusedData_->odomTwsit, robotState_);
+    get_state_from_apriltag();
+    ekf_->update(robotState_, fusedData_->cmd, robotState_);
 }
 
 double JointStateEstimator::getYaw(const tf2::Quaternion &q) {
     double roll, pitch, yaw;
     tf2::Matrix3x3 m(q);
     m.getRPY(roll, pitch, yaw);
-    double theta = fmod(yaw + M_PI, 2 * M_PI) - M_PI_2;
+    double theta = fmod(yaw + M_PI, 2 * M_PI);
     return theta;
 }

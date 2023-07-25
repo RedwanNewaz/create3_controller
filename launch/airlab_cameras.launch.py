@@ -14,7 +14,7 @@ from ament_index_python.packages import get_package_share_directory
 cfg_36h11 = {
     "image_transport": "raw",
     "family": "36h11",
-    "size": 0.2, # 0.162
+    "size": 0.175, # 0.162
     "max_hamming": 0,
     "z_up": True,
     "detector": {"threads" : 12, "sharpening": 0.25},
@@ -144,25 +144,28 @@ def generate_launch_description():
     logitec_container = get_container("logitec", logitec_cam)
 
 
-    # static transform
-    tf_logitec_map = [0.45433333,  0.772,  3.0265,  0.95433333,  0.00733333,  0.00333333, -0.29733333]
-    tf_nexigo_map = [-0.47433333,  0.89816667,  2.41483333,  0.01066667,  0.98533333, -0.16933333, 0.01066667]
-    tf_map_nexigo = [-0.430, -0.029, 2.584, 0.011, 0.985, -0.169, -0.011]
-    nexigo_to_logitec = [0.099, 2.427, -0.291, -0.016, -0.132, 0.991, 0.011]
-    logitec_to_nexigo = [0.026, 2.267, 0.919, -0.016, -0.132, 0.991, -0.011]
+    # static transform nexigo
 
-    tf_logitec_map_arg = list(map(str, tf_logitec_map)) + ["logitec_cam", "map"]
+    tf_nexigo_map = [0.259, 1.737, 3.070, -0.014, 0.970, 0.226, 0.080]
+    nexigo_to_logitec = [0.274, 3.869 - 0.25, 0.484, -0.059, -0.153, 0.986, -0.026]
     tf_nexigo_map_arg = list(map(str, tf_nexigo_map)) + ["nexigo_cam", "map"]
-    tf_logitec_nexigo_arg = list(map(str, logitec_to_nexigo)) + ["logitec_cam", "nexigo_cam"]
     tf_nexigo_logitec_arg = list(map(str, nexigo_to_logitec)) + ["nexigo_cam", "logitec_cam"]
+    nexigo_to_map = Node(package = "tf2_ros",
+                         name = "tf_nexigo_map",
+                         executable = "static_transform_publisher",
+                         arguments = tf_nexigo_map_arg)
+
+    nexigo_to_logitec = Node(package = "tf2_ros",
+                             name="tf_logitec_nexigo",
+                             executable = "static_transform_publisher",
+                             arguments = tf_nexigo_logitec_arg)
 
 
-
-    # nexigo_to_map = Node(package = "tf2_ros",
-    #                      name = "tf_nexigo_map",
-    #                      executable = "static_transform_publisher",
-    #                      arguments = tf_nexigo_map_arg)
-
+    # static transform logitec
+    tf_logitec_map = [-0.232, 1.258, 3.098, 0.996, -0.013, -0.026, 0.073]
+    logitec_to_nexigo = [0.463, 3.809 - 0.25, 0.750, -0.059, -0.153, 0.986, 0.026]
+    tf_logitec_map_arg = list(map(str, tf_logitec_map)) + ["logitec_cam", "map"]
+    tf_logitec_nexigo_arg = list(map(str, logitec_to_nexigo)) + ["logitec_cam", "nexigo_cam"]
 
     logitec_to_map = Node(package = "tf2_ros",
                           name="tf_logitec_map",
@@ -173,23 +176,15 @@ def generate_launch_description():
                           name="tf_logitec_nexigo",
                           executable = "static_transform_publisher",
                           arguments = tf_logitec_nexigo_arg)
-    
-    # nexigo_to_logitec = Node(package = "tf2_ros",
-    #                       name="tf_nexigo_logitec",
-    #                       executable = "static_transform_publisher",
-    #                       arguments = tf_nexigo_logitec_arg)
-
-
-
-
-
 
 
     ld.add_action(nexigo_container)
     ld.add_action(logitec_container)
-    ld.add_action(logitec_to_nexigo)
-    ld.add_action(logitec_to_map)
-    # ld.add_action(nexigo_to_logitec)
+
+    # static transform
+    ld.add_action(nexigo_to_logitec)
+    ld.add_action(nexigo_to_map)
+
 
 
     return ld

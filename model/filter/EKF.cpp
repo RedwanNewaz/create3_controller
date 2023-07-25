@@ -71,13 +71,13 @@ void EKF::ekf_estimation(const Eigen::Vector3f& z, const Eigen::Vector2f& u)
 
 //    // borrowed from https://github.com/JunshengFu/tracking-with-Extended-Kalman-Filter/blob/master/src/kalman_filter.cpp
 //    // normalize the angle between -pi to pi
-//    while(y(2) > M_PI_2){
-//        y(2) -= M_PI_4;
-//    }
-//
-//    while(y(2) < -M_PI_2){
-//        y(2) += M_PI_4;
-//    }
+    while(y(2) > M_PI_2){
+        y(2) -= M_PI_4;
+    }
+
+    while(y(2) < -M_PI_2){
+        y(2) += M_PI_4;
+    }
 
     Eigen::Matrix3f S = jH * PPred * jH.transpose() + R;
     Eigen::Matrix<float, 4, 3> K = PPred * jH.transpose() * S.inverse();
@@ -92,8 +92,10 @@ void EKF::update(const tf2::Transform &obs, const geometry_msgs::msg::Twist& cmd
     tf2::Matrix3x3 m(q);
     m.getRPY(roll, pitch, theta);
 
+//    double w = cmd.angular.z;
+//    double v = sqrt(cmd.linear.x * cmd.linear.x + cmd.linear.y * cmd.linear.y );
     double w = cmd.angular.z;
-    double v = sqrt(cmd.linear.x * cmd.linear.x + cmd.linear.y * cmd.linear.y );
+    double v = cmd.linear.x;
 
 
     if(!initialized)
