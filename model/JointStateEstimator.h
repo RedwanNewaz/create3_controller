@@ -14,6 +14,8 @@
 #include "tf2_ros/buffer_interface.h"
 #include "LoggerCSV.h"
 #include <map>
+#include "tf2/LinearMath/Quaternion.h"
+#include "tf2_ros/transform_broadcaster.h"
 //https://docs.ros.org/en/foxy/How-To-Guides/Overriding-QoS-Policies-For-Recording-And-Playback.html
 //ros2 run tf2_ros static_transform_publisher 0 0 0  0 0 0 map odom
 
@@ -50,6 +52,7 @@ namespace model
         std::once_flag flagOdom_;
         rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr ekf_odom_pub_, ekf_apriltag_pub_;
         std::unique_ptr<filter::EKF> ekf_;
+        std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
         enum DATA_TYPE{
             ODOM = 0,
             APRILTAG,

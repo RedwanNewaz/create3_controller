@@ -50,7 +50,8 @@ JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEst
     ekf_ = std::make_unique<filter::EKF>(1.0 / 200); // 200 Hz
     lowpassFilter_ = std::make_unique<filter::ComplementaryFilter>(0.85);
 
-
+    // Initialize the transform broadcaster
+    tf_broadcaster_ =  std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 
     // enable logger
     std::vector<std::string> header = {"cam_x", "cam_y", "cam_theta", "odom_x", "odom_y", "odom_theta", "cmd_vx", "cmd_vy", "cmd_wz", "odom_vx", "odom_vy", "odom_wz"};
@@ -182,11 +183,11 @@ void JointStateEstimator::sensorFusion()
     ekf_odom_pub_->publish(msg);
 
     // reset
-//    if(!std::count(fusedData_->updateStatus.begin(), fusedData_->updateStatus.end(), false))
-//    {
-//        fusedData_ = std::make_unique<FusedData>();
-//    }
-//
+    if(!std::count(fusedData_->updateStatus.begin(), fusedData_->updateStatus.end(), false))
+    {
+        fusedData_ = std::make_unique<FusedData>();
+    }
+
 
 //    logger_.addRow(fusedData_->getLog());
 
@@ -196,10 +197,6 @@ void JointStateEstimator::get_state_from_odom() {
 
     auto cameraToRobot = fusedData_->apriltag;
     auto odomToRobot = fusedData_->odom;
-//    auto cameraToOdom = apriltagInit_->inverseTimes(*odomInit_);
-//    auto cameraToRobot_odom = cameraToOdom.inverseTimes(odomToRobot);
-//
-//    auto origin = cameraToRobot_odom.getOrigin() - cameraToOdom.getOrigin() - odomInit_->getOrigin();
 
     auto origin = odomToRobot.getOrigin();
     origin = odomInit_->getOrigin() - origin;
@@ -239,6 +236,41 @@ void JointStateEstimator::get_state_from_fusion() {
     if(apriltagInit_ == nullptr)
         return;
 
+    //publish map to odom static transformation
+    auto M_t_O_init = *apriltagInit_;
+    auto O_t_O_init = *odomInit_;
+    auto M_t_O = M_t_O_init * O_t_O_init;
+    auto O_t_R = fusedData_->odom;
+
+
+    auto map_to_robot = M_t_O * O_t_R;
+
+    geometry_msgs::msg::TransformStamped t;
+    // Read message content and assign it to
+    // corresponding tf variables
+    t.header.stamp = this->get_clock()->now();
+    t.header.frame_id = "map";
+    t.child_frame_id = std::string(get_namespace()) +  "/odom";
+
+    // Turtle only exists in 2D, thus we get x and y translation
+    // coordinates from the message and set the z coordinate to 0
+    auto origin = map_to_robot.getOrigin();
+    t.transform.translation.x = origin.x();
+    t.transform.translation.y = origin.y();
+    t.transform.translation.z = origin.z();
+
+    // For the same reason, turtle can only rotate around one axis
+    // and this why we set rotation in x and y to 0 and obtain
+    // rotation in z axis from the message
+    tf2::Quaternion q = map_to_robot.getRotation();
+    t.transform.rotation.x = q.x();
+    t.transform.rotation.y = q.y();
+    t.transform.rotation.z = q.z();
+    t.transform.rotation.w = q.w();
+
+    // Send the transformation
+    tf_broadcaster_->sendTransform(t);
+
 
 
 //# fuse odom + cmd_vel
@@ -250,7 +282,7 @@ void JointStateEstimator::get_state_from_fusion() {
 //# fuse cam + odom_vel
 
     get_state_from_apriltag();
-    ekf_->update(robotState_, fusedData_->cmd, robotState_);
+//    ekf_->update(robotState_, fusedData_->cmd, robotState_);
 }
 
 double JointStateEstimator::getYaw(const tf2::Quaternion &q) {

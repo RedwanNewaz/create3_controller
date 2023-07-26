@@ -54,9 +54,9 @@ def generate_launch_description():
         namespace=namespace,
         name='create3_simple_controller',
         parameters=[
-            {'sensor' : 'odom',
+            {'sensor' : 'fusion',
              'robotTag': TAG_MAP.get(robotName, 'tag36h11:32'),
-             'logOutput' : "/var/tmp"
+             'logOutput' : "/home/roboticslab/colcon_ws/src/create3_controller/launch/build"
              }
         ],
         # disable this line if not using rviz to send goal 
