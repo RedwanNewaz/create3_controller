@@ -75,6 +75,8 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        ac31/odom:
+          Value: true
         logitec_cam:
           Value: true
         map:
@@ -89,13 +91,13 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        logitec_cam:
+        nexigo_cam:
+          logitec_cam:
+            tag36h11:7:
+              {}
           map:
-            {}
-          nexigo_cam:
-            {}
-          tag36h11:7:
-            {}
+            ac31/odom:
+              {}
       Update Interval: 0
       Value: true
     - Class: rviz_default_plugins/Image
@@ -116,14 +118,14 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        {}
+        create3: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /dwa_create3
+        Value: /ac31/dwa_create3
       Value: true
     - Alpha: 0.699999988079071
       Class: rviz_default_plugins/Map

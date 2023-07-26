@@ -126,6 +126,7 @@ void JointStateEstimator::lookupTransform()
         tf2::Quaternion q;
         q.setRPY(0, 0, yaw + M_PI);
 
+
 //        q.setRPY(roll, pitch + M_PI, 3 * M_PI_2 - yaw);
 
         current.setRotation(q);
@@ -237,13 +238,13 @@ void JointStateEstimator::get_state_from_fusion() {
         return;
 
     //publish map to odom static transformation
-    auto M_t_O_init = *apriltagInit_;
-    auto O_t_O_init = *odomInit_;
-    auto M_t_O = M_t_O_init * O_t_O_init;
-    auto O_t_R = fusedData_->odom;
+//    auto M_t_O_init = *apriltagInit_;
+//    auto O_t_O_init = *odomInit_;
+//    auto M_t_O = M_t_O_init * O_t_O_init;
+//    auto O_t_R = fusedData_->odom;
+//    auto map_to_robot = M_t_O * O_t_R;
+    get_state_from_odom();
 
-
-    auto map_to_robot = M_t_O * O_t_R;
 
     geometry_msgs::msg::TransformStamped t;
     // Read message content and assign it to
@@ -254,7 +255,7 @@ void JointStateEstimator::get_state_from_fusion() {
 
     // Turtle only exists in 2D, thus we get x and y translation
     // coordinates from the message and set the z coordinate to 0
-    auto origin = map_to_robot.getOrigin();
+    auto origin = robotState_.getOrigin();
     t.transform.translation.x = origin.x();
     t.transform.translation.y = origin.y();
     t.transform.translation.z = origin.z();
@@ -262,11 +263,14 @@ void JointStateEstimator::get_state_from_fusion() {
     // For the same reason, turtle can only rotate around one axis
     // and this why we set rotation in x and y to 0 and obtain
     // rotation in z axis from the message
-    tf2::Quaternion q = map_to_robot.getRotation();
-    t.transform.rotation.x = q.x();
-    t.transform.rotation.y = q.y();
-    t.transform.rotation.z = q.z();
-    t.transform.rotation.w = q.w();
+    tf2::Quaternion q = robotState_.getRotation();
+    auto yaw = getYaw(q);
+    tf2::Quaternion viz;
+    viz.setRPY(0, 0, yaw);
+    t.transform.rotation.x = viz.x();
+    t.transform.rotation.y = viz.y();
+    t.transform.rotation.z = viz.z();
+    t.transform.rotation.w = viz.w();
 
     // Send the transformation
     tf_broadcaster_->sendTransform(t);
@@ -282,6 +286,7 @@ void JointStateEstimator::get_state_from_fusion() {
 //# fuse cam + odom_vel
 
     get_state_from_apriltag();
+    robotState_.setRotation(q);
 //    ekf_->update(robotState_, fusedData_->cmd, robotState_);
 }
 
