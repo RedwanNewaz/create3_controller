@@ -15,7 +15,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(irobot_create_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 # uncomment the following section in order to fill in
-
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 find_package(rcl_interfaces REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
@@ -23,6 +23,8 @@ find_package(tf2_ros REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 find_package(Eigen3 REQUIRED)
+#find_package(sensor_fusion REQUIRED)
+add_subdirectory(ThirdParty/sensor_fusion)
 
 include_directories(
 		include
@@ -37,6 +39,8 @@ include_directories(
 		${rcl_interfaces_INCLUDE_DIRS}
 		${tf2_INCLUDE_DIRS}
 		${tf2_ros_INCLUDE_DIRS}
+#		${SENSOR_FUSION_INCLUDE_DIRS}
+		ThirdParty/sensor_fusion/include
         )
 
 
@@ -61,7 +65,9 @@ target_link_libraries(create3_model
 		${irobot_create_msgs_LIBRARIES}
 		${nav_msgs_LIBRARIES}
 		${tf2_ros_LIBRARIES}
+#		${SENSOR_FUSION_LIBRARIES}
 		Eigen3::Eigen
+		sensor_fusion
 		)
 
 set(create2_view_SRC_FILES

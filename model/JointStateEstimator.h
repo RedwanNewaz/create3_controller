@@ -16,8 +16,17 @@
 #include <map>
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2_ros/transform_broadcaster.h"
+
+#include <filters.hpp>
+#include <process_models.hpp>
+#include <definitions.hpp>
+#include <fusion.hpp>
+
+
 //https://docs.ros.org/en/foxy/How-To-Guides/Overriding-QoS-Policies-For-Recording-And-Playback.html
 //ros2 run tf2_ros static_transform_publisher 0 0 0  0 0 0 map odom
+using namespace ser94mor::sensor_fusion;
+using namespace Eigen;
 
 namespace model 
 {
@@ -117,6 +126,7 @@ namespace model
         tf2::Transform robotState_;
         std::map<std::string, DATA_TYPE> sensorType_;
         double odom_heading_offset_;
+        UKF_CTRV_LIDAR_RADAR_Fusion *fusion_;
 
         std::unique_ptr<model::filter::ComplementaryFilter> lowpassFilter_;
 

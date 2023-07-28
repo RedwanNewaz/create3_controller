@@ -40,6 +40,7 @@ namespace model
             auto q = transform.transform.rotation;
             position_ = {p.x, p.y, p.z};
             orientation_ = {q.x, q.y, q.z, q.w};
+            timestamp_ = transform.header.stamp.sec;
 
             if(transform.header.frame_id == "logitec_cam")
             {
@@ -57,6 +58,11 @@ namespace model
             }
             else
                 frame_ = transform.header.frame_id + "->" + transform.child_frame_id;
+        }
+
+        double_t  getTimestamp() const
+        {
+            return timestamp_;
         }
 
         explicit Pose(const std::array<double, 7>& static_tf, const std::string frame):frame_(frame)
@@ -128,6 +134,7 @@ namespace model
         std::array<double, 3> position_;
         std::array<double, 4> orientation_;
         std::string frame_;
+        double_t timestamp_;
     public:
         static Pose *nexigo_map;
         static Pose *logitec_map;

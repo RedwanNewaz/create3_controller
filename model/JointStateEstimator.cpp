@@ -59,6 +59,23 @@ JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEst
     logger_.addHeader(header);
     logger_.setOutputFolder(outputFolder);
 
+    // sensor fusion
+    CTRV::ProcessNoiseCovarianceMatrix ctrv_mtx;
+    ctrv_mtx << 0.126025,  0.0,
+            0.0,      0.16;
+
+    Lidar::MeasurementCovarianceMatrix lidar_mtx;
+    lidar_mtx << 0.0225,    0.0,
+            0.0, 0.0225;
+
+    Radar::MeasurementCovarianceMatrix radar_mtx;
+    radar_mtx << 0.0009,    0.0,  0.0,
+            0.0, 0.0009,  0.0,
+            0.0,    0.0, 0.09;
+
+    fusion_ = new UKF_CTRV_LIDAR_RADAR_Fusion{ctrv_mtx, lidar_mtx, radar_mtx};
+
+
 }
 
 void JointStateEstimator::tf_to_odom(const tf2::Transform& t, nav_msgs::msg::Odometry& odom)
@@ -121,6 +138,18 @@ void JointStateEstimator::lookupTransform(const Pose& pose)
         });
 
     }
+
+
+    auto raw_measurements_ = VectorXd(2);
+    raw_measurements_ << p.x, p.y;
+    Lidar::Measurement measurement{pose.getTimestamp(), raw_measurements_};
+
+    fusion_->ProcessMeasurement(measurement);
+
+
+
+
+
 }
 void JointStateEstimator::cmd_callback(geometry_msgs::msg::Twist::SharedPtr msg)
 {
@@ -148,10 +177,18 @@ void JointStateEstimator::sensorFusion()
     if(!isUpdated)
         return;
 
-    //skip orientation
+    auto belief = fusion_->GetBelief();
+    const auto& sv{belief.mu()};
+    CTRV::ROStateVectorView state_vector_view{sv};
+    tf2::Vector3 origin(state_vector_view.px(), state_vector_view.py(), 0);
+    robotState_.setOrigin(origin);
+//
+//    //skip orientation
     auto q = robotState_.getRotation();
     ekf_->update(robotState_, fusedData_->cmd, robotState_);
     robotState_.setRotation(q);
+
+
 
     // convert to odom message
     nav_msgs::msg::Odometry msg;
