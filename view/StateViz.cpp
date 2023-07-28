@@ -9,14 +9,6 @@ StateViz::StateViz(const std::string& nodeName, const std::string& frameName):No
 {
     create3_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("ekf/odom", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
         state_callback(msg, DEFAULT);});
-
-//    // multirobot gazebo simulation we need two more robots
-//    create3_state_sub2_ = this->create_subscription<nav_msgs::msg::Odometry>("/ac31/odom/filtered", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
-//        state_callback(msg, RED);});
-//
-//    create3_state_sub3_ = this->create_subscription<nav_msgs::msg::Odometry>("/ac32/odom/filtered", 10, [this](nav_msgs::msg::Odometry::SharedPtr msg) {
-//        state_callback(msg, GREEN);});
-
     create3_state_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("/ekf/apriltag/viz", 10);
     timer_ = this->create_wall_timer(1s, [this] { publish_traj(); });
 }

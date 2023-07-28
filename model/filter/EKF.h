@@ -30,7 +30,7 @@ namespace model
             Eigen::Matrix3f R;
             Eigen::Vector4f xEst;
             Eigen::Matrix4f PEst;
-            const double DT;
+            double DT;
             bool initialized;
 
         };

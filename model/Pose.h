@@ -143,14 +143,38 @@ namespace model
             origin.setY(-y);
             M_t_R.setOrigin(origin);
 
+            // fix rotation
+            auto q = M_t_R.getRotation();
+            double roll, pitch, yaw;
+            tf2::Matrix3x3 m(q);
+            m.getRPY(roll, pitch, yaw);
+            q.setRPY(0, 0,     M_PI - yaw  );
+            M_t_R.setRotation(q);
+
             return M_t_R;
         }
 
         static tf2::Transform mapToNexigoTag(const tf2::Transform& N_t_R)
         {
             auto N_t_M = nexigo_map->getTransform();
-            return N_t_M.inverseTimes(N_t_R);
+            auto M_t_R = N_t_M.inverseTimes(N_t_R);
+
+            auto origin = M_t_R.getOrigin();
+            double x = origin.getX();
+            origin.setX(-x);
+            M_t_R.setOrigin(origin);
+
+
+            auto q = M_t_R.getRotation();
+            double roll, pitch, yaw;
+            tf2::Matrix3x3 m(q);
+            m.getRPY(roll, pitch, yaw);
+            q.setRPY(0, 0,     2 * M_PI - yaw  );
+            M_t_R.setRotation(q);
+
+            return M_t_R;
         }
+
         void update(const tf2::Transform& tf)
         {
             auto p = tf.getOrigin();

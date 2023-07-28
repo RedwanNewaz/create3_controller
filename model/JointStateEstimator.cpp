@@ -105,21 +105,6 @@ void JointStateEstimator::lookupTransform(const Pose& pose)
 
 
     auto transform = pose.getTransform();
-    auto origin = transform.getOrigin();
-    origin.setX(-origin.getX());
-    transform.setOrigin(origin);
-
-    //FIX orientation
-    auto q = transform.getRotation();
-    double roll, pitch, yaw;
-    tf2::Matrix3x3 m(q);
-    m.getRPY(roll, pitch, yaw);
-    //TO see the actual detection
-//    q.setRPY(roll, pitch + M_PI,  yaw + M_PI);
-    q.setRPY(0, 0,   2* M_PI - yaw);
-    transform.setRotation(q);
-
-
     fusedData_->apriltag = transform;
     fusedData_->updateStatus[APRILTAG] = true;
     auto p = pose.getPoint();
@@ -166,7 +151,6 @@ void JointStateEstimator::sensorFusion()
     //skip orientation
     auto q = robotState_.getRotation();
     ekf_->update(robotState_, fusedData_->cmd, robotState_);
-
     robotState_.setRotation(q);
 
     // convert to odom message
@@ -222,7 +206,6 @@ bool JointStateEstimator::get_state_from_apriltag() {
         return true;
     }
     return false;
-//    lowpassFilter_->update(fusedData_->apriltag, robotState_);
 }
 
 bool JointStateEstimator::get_state_from_fusion() {

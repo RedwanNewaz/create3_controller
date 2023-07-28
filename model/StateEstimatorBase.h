@@ -20,6 +20,70 @@ using namespace std::chrono_literals;
 
 namespace model
 {
+    class StateMachine
+    {
+        int state_;
+    public:
+        StateMachine():state_(0)
+        {
+
+        }
+        int update(bool logitec, bool nexigo)
+        {
+
+            if(state_ == 0 && nexigo && !logitec)
+            {
+                state_ = 2;
+            }
+            if(state_ == 0 && !nexigo && logitec)
+            {
+                state_ = 1;
+            }
+
+            if(state_ == 0 && nexigo && logitec)
+            {
+                state_ = 2; // priority goes to nexigo
+            }
+
+            if(state_ == 1 &&  nexigo && logitec)
+            {
+                state_ = 1;
+            }
+
+            if(state_ == 1 &&  !nexigo && logitec)
+            {
+                state_ = 1;
+            }
+
+            if(state_ == 1 && nexigo && !logitec)
+            {
+                state_ = 2; // nexigo
+            }
+
+
+            if(state_ == 2 && nexigo && !logitec)
+            {
+                state_ = 2;
+            }
+            if(state_ == 2 && !nexigo && logitec)
+            {
+                state_ = 1;
+            }
+            if(state_ == 2 && nexigo && logitec)
+            {
+                state_ = 2;
+            }
+
+
+
+            if (!logitec && !nexigo)
+            {
+                state_ = 0;
+            }
+            return state_;
+        }
+
+    };
 
     class StateEstimatorBase: public rclcpp::Node
     {
@@ -59,12 +123,19 @@ namespace model
             geometry_msgs::msg::TransformStamped logitecCamPose, nexigoCamPose;
             auto logitecCam = getTransformation("logitec_cam", toFrameRel, logitecCamPose);
             auto nexigoCam = getTransformation("nexigo_cam", toFrameRel, nexigoCamPose);
+            int state = sm_.update(logitecCam, nexigoCam);
+            switch (state) {
+                case 1:
+                    lookupTransform(Pose(logitecCamPose));
+                    break;
+                case 2:
+                    lookupTransform(Pose(nexigoCamPose));
+                    break;
+            }
 
-            if(logitecCam)
-                lookupTransform(Pose(logitecCamPose));
+            RCLCPP_INFO(get_logger(), "state = %d", state);
 
-            if(nexigoCam)
-                lookupTransform(Pose(nexigoCamPose));
+
 
             sensorFusion();
         }
@@ -111,6 +182,7 @@ namespace model
     private:
         std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
         std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+        StateMachine sm_;
     };
 }
 
