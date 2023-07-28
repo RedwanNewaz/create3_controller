@@ -105,6 +105,9 @@ void JointStateEstimator::lookupTransform(const Pose& pose)
 
 
     auto transform = pose.getTransform();
+    auto origin = transform.getOrigin();
+    origin.setX(-origin.getX());
+    transform.setOrigin(origin);
 
     //FIX orientation
     auto q = transform.getRotation();
@@ -113,7 +116,7 @@ void JointStateEstimator::lookupTransform(const Pose& pose)
     m.getRPY(roll, pitch, yaw);
     //TO see the actual detection
 //    q.setRPY(roll, pitch + M_PI,  yaw + M_PI);
-    q.setRPY(0, 0,  yaw);
+    q.setRPY(0, 0,   2* M_PI - yaw);
     transform.setRotation(q);
 
 
@@ -163,6 +166,7 @@ void JointStateEstimator::sensorFusion()
     //skip orientation
     auto q = robotState_.getRotation();
     ekf_->update(robotState_, fusedData_->cmd, robotState_);
+
     robotState_.setRotation(q);
 
     // convert to odom message
@@ -196,7 +200,6 @@ bool JointStateEstimator::get_state_from_odom() {
     origin.setY(y);
 
     origin = origin + apriltagInit_->getOrigin();
-
     auto q = odomToRobot.getRotation();
     auto yaw = getYaw(q);
     q.setRPY(0, 0, yaw);

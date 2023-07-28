@@ -54,7 +54,7 @@ def generate_launch_description():
         namespace=namespace,
         name='create3_simple_controller',
         parameters=[
-            {'sensor' : 'fusion',
+            {'sensor' : 'apriltag',
              'robotTag': TAG_MAP.get(robotName, 'tag36h11:32'),
              'logOutput' : "/home/roboticslab/colcon_ws/src/create3_controller/launch/build"
              }

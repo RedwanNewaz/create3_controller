@@ -61,22 +61,20 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        robot: true
+        /ac31: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /ac31/ekf/apriltag/viz
+        Value: /ekf/apriltag/viz
       Value: true
     - Class: rviz_default_plugins/TF
       Enabled: true
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        ac31/odom:
-          Value: true
         logitec_cam:
           Value: true
         map:
@@ -96,8 +94,7 @@ Visualization Manager:
             tag36h11:7:
               {}
           map:
-            ac31/odom:
-              {}
+            {}
       Update Interval: 0
       Value: true
     - Class: rviz_default_plugins/Image
@@ -118,7 +115,7 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        create3: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
