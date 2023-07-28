@@ -45,8 +45,7 @@ namespace model
         rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
         rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_sub_;
 
-        const std::string fromFrameRel = "map";
-        std::string toFrameRel;
+
         std::string estimatorType_;
         tf2::Transform *odomInit_, *apriltagInit_;
         std::once_flag flagOdom_;
@@ -108,8 +107,8 @@ namespace model
         };
 
         ///@brief variables related to tf listener
-        std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
-        std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+
+
         std::unique_ptr<FusedData> fusedData_;
         tf2::TimePoint lastTFstamp_;
 
@@ -121,9 +120,9 @@ namespace model
 
         std::unique_ptr<model::filter::ComplementaryFilter> lowpassFilter_;
 
-        void get_state_from_odom();
-        void get_state_from_apriltag();
-        void get_state_from_fusion();
+        bool get_state_from_odom();
+        bool get_state_from_apriltag();
+        bool get_state_from_fusion();
         double getYaw(const tf2::Quaternion& q);
 
 
@@ -131,7 +130,7 @@ namespace model
         void tf_to_odom(const tf2::Transform& t, nav_msgs::msg::Odometry& odom);
         virtual void odom_callback(nav_msgs::msg::Odometry::SharedPtr msg);
         void cmd_callback(geometry_msgs::msg::Twist::SharedPtr msg);
-        void lookupTransform() override;
+        void lookupTransform(const Pose& pose) override;
         void sensorFusion() override;
     };
 }

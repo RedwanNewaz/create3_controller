@@ -6,11 +6,13 @@
 #include "tf2/time.h"
 #include <time.h>
 
-using namespace model; 
+using namespace model;
+Pose *Pose::nexigo_map = new model::Pose ({0.259, 1.737, 3.070, -0.014, 0.970, 0.226, 0.080}, "nexigo_cam->map");
+Pose *Pose::logitec_map = new model::Pose ({-0.232, 1.258, 3.098, 0.996, -0.013, -0.026, 0.073}, "logitec_cam->map");
 
 JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEstimatorBase(nodeName)
 {
-    this->declare_parameter("sensor", "odom");
+    this->declare_parameter("sensor", "apriltag");
     this->declare_parameter("robotTag", "tag36h11:7");
     this->declare_parameter("logOutput", "/var/tmp");
     this->declare_parameter("odom_heading_offset", M_PI);
@@ -21,9 +23,7 @@ JointStateEstimator::JointStateEstimator(const std::string &nodeName) : StateEst
     cmd_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", qos   , std::bind(
             &JointStateEstimator::cmd_callback, this, std::placeholders::_1)
     );
-    // prepare for transformation
-    tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
-    tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+
 
     // save them as tf::transform format
     fusedData_ = std::make_unique<FusedData>();
@@ -97,50 +97,30 @@ void JointStateEstimator::odom_callback(nav_msgs::msg::Odometry::SharedPtr msg)
     fusedData_->odom.setRotation(q);
     fusedData_->odomTwsit = msg->twist.twist;
     fusedData_->updateStatus[ODOM] = true;
+
 }
 
-void JointStateEstimator::lookupTransform()
+void JointStateEstimator::lookupTransform(const Pose& pose)
 {
 
-    tf2::Transform current;
-//    tf2::Time timeout = rclcpp::Duration::from_seconds(0.1);
-    try {
-        auto t = tf_buffer_->lookupTransform(
-                fromFrameRel, toFrameRel,
-                tf2::TimePointZero);
-        current.setOrigin(tf2::Vector3(t.transform.translation.x,
-                                                    t.transform.translation.y,
-                                                    t.transform.translation.z
-        ));
 
-        tf2::Quaternion tagq(
-                t.transform.rotation.x,
-                t.transform.rotation.y,
-                t.transform.rotation.z,
-                t.transform.rotation.w);
+    auto transform = pose.getTransform();
 
-        double roll, pitch, yaw;
-        tf2::Matrix3x3 m(tagq);
-        m.getRPY(roll, pitch, yaw);
-
-        tf2::Quaternion q;
-        q.setRPY(0, 0, yaw + M_PI);
+    //FIX orientation
+    auto q = transform.getRotation();
+    double roll, pitch, yaw;
+    tf2::Matrix3x3 m(q);
+    m.getRPY(roll, pitch, yaw);
+    //TO see the actual detection
+//    q.setRPY(roll, pitch + M_PI,  yaw + M_PI);
+    q.setRPY(0, 0,  yaw);
+    transform.setRotation(q);
 
 
-//        q.setRPY(roll, pitch + M_PI, 3 * M_PI_2 - yaw);
-
-        current.setRotation(q);
-
-        fusedData_->apriltag = current;
-        fusedData_->updateStatus[APRILTAG] = true;
-
-    } catch (const tf2::TransformException & ex) {
-           RCLCPP_INFO(
-                   this->get_logger(), "Could not transform %s to %s: %s",
-                   toFrameRel.c_str(), fromFrameRel.c_str(), ex.what());
-           return;
-    }
-
+    fusedData_->apriltag = transform;
+    fusedData_->updateStatus[APRILTAG] = true;
+    auto p = pose.getPoint();
+    RCLCPP_INFO(get_logger(), "[apriltag] =  (%03lf, %03lf)", p.x, p.y);
     // generate consensus using sensor fusion algorithm
     // check if all sensors are updated or not: there is no false in the array
     if(!std::count(fusedData_->updateStatus.begin(), fusedData_->updateStatus.end(), false))
@@ -162,8 +142,6 @@ void JointStateEstimator::cmd_callback(geometry_msgs::msg::Twist::SharedPtr msg)
 
 void JointStateEstimator::sensorFusion()
 {
-    if(odomInit_ == nullptr || !fusedData_->updateStatus[ODOM])
-        return;
 
     //check for suitable algorithm found
     if(sensorType_.find(estimatorType_) == sensorType_.end())
@@ -172,11 +150,20 @@ void JointStateEstimator::sensorFusion()
         return;
     }
 
+    bool isUpdated;
     switch (sensorType_[estimatorType_]) {
-        case APRILTAG: get_state_from_apriltag();break;
-        case ODOM: get_state_from_odom(); break;
-        case FUSION: get_state_from_fusion(); break;
+        case APRILTAG: isUpdated = get_state_from_apriltag();break;
+        case ODOM: isUpdated = get_state_from_odom(); break;
+        case FUSION: isUpdated = get_state_from_fusion(); break;
     }
+
+    if(!isUpdated)
+        return;
+
+    //skip orientation
+    auto q = robotState_.getRotation();
+    ekf_->update(robotState_, fusedData_->cmd, robotState_);
+    robotState_.setRotation(q);
 
     // convert to odom message
     nav_msgs::msg::Odometry msg;
@@ -194,11 +181,12 @@ void JointStateEstimator::sensorFusion()
 
 }
 
-void JointStateEstimator::get_state_from_odom() {
+bool JointStateEstimator::get_state_from_odom() {
 
-    auto cameraToRobot = fusedData_->apriltag;
+    if(odomInit_ == nullptr || !fusedData_->updateStatus[ODOM] || apriltagInit_ == nullptr)
+        return false;
+
     auto odomToRobot = fusedData_->odom;
-
     auto origin = odomToRobot.getOrigin();
     origin = odomInit_->getOrigin() - origin;
 
@@ -209,7 +197,6 @@ void JointStateEstimator::get_state_from_odom() {
 
     origin = origin + apriltagInit_->getOrigin();
 
-
     auto q = odomToRobot.getRotation();
     auto yaw = getYaw(q);
     q.setRPY(0, 0, yaw);
@@ -218,24 +205,27 @@ void JointStateEstimator::get_state_from_odom() {
     robotState_.setRotation(q);
 
 
-    auto diffOdomToTag =  origin - cameraToRobot.getOrigin();
-    auto apriltag =  apriltagInit_->getOrigin();
-    auto odometry = odomInit_->getOrigin();
-    RCLCPP_INFO(get_logger(), "diffOdomToTag(x, y) = (%lf, %lf) ", diffOdomToTag.x(), diffOdomToTag.y());
-    RCLCPP_INFO(get_logger(), "apriltag(x, y) = (%lf, %lf) ", apriltag.x(), apriltag.y());
-    RCLCPP_INFO(get_logger(), "odometry(x, y) = (%lf, %lf) ", odometry.x(), odometry.y());
-
+//    auto apriltag =  apriltagInit_->getOrigin();
+//    auto odometry = odomInit_->getOrigin();
+//    RCLCPP_INFO(get_logger(), "apriltag(x, y) = (%lf, %lf) ", apriltag.x(), apriltag.y());
+//    RCLCPP_INFO(get_logger(), "odometry(x, y) = (%lf, %lf) ", odometry.x(), odometry.y());
+    return true;
 }
 
-void JointStateEstimator::get_state_from_apriltag() {
-
-    lowpassFilter_->update(fusedData_->apriltag, robotState_);
+bool JointStateEstimator::get_state_from_apriltag() {
+    if(fusedData_->updateStatus[APRILTAG])
+    {
+        robotState_ = fusedData_->apriltag;
+        return true;
+    }
+    return false;
+//    lowpassFilter_->update(fusedData_->apriltag, robotState_);
 }
 
-void JointStateEstimator::get_state_from_fusion() {
+bool JointStateEstimator::get_state_from_fusion() {
 
-    if(apriltagInit_ == nullptr)
-        return;
+    if(apriltagInit_ == nullptr || odomInit_ == nullptr)
+        return false;
 
     //publish map to odom static transformation
 //    auto M_t_O_init = *apriltagInit_;
@@ -287,6 +277,7 @@ void JointStateEstimator::get_state_from_fusion() {
 
     get_state_from_apriltag();
     robotState_.setRotation(q);
+    return true;
 //    ekf_->update(robotState_, fusedData_->cmd, robotState_);
 }
 
