@@ -11,8 +11,8 @@ namespace view {
         rviz_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>("goal_pose", 10, std::bind(
                 &ControllerViz::rviz_callback, this, std::placeholders::_1)
         );
-        marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("dwa_create3", 10);
-        obs_sub_ = this->create_subscription<geometry_msgs::msg::PoseArray>("obstacles", 10, [&](const geometry_msgs::msg::PoseArray::SharedPtr msg)
+        marker_pub_ = this->create_publisher<visualization_msgs::msg::Marker>("/setpoint", 10);
+        obs_sub_ = this->create_subscription<geometry_msgs::msg::PoseArray>("/obstacles", 10, [&](const geometry_msgs::msg::PoseArray::SharedPtr msg)
         {return obstacle_callback(msg);});
     }
     void ControllerViz::obstacle_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg) {
@@ -61,7 +61,7 @@ namespace view {
         marker.header.frame_id = frameName_;
 
         marker.header.stamp = this->get_clock()->now();
-        marker.ns = "create3";
+        marker.ns = get_namespace();
         marker.id = 2;
         marker.type = visualization_msgs::msg::Marker::SPHERE;
 
@@ -84,7 +84,7 @@ namespace view {
         marker.header.frame_id = frameName_;
 
         marker.header.stamp = this->get_clock()->now();
-        marker.ns = "create3";
+        marker.ns = get_namespace();
         marker.id = 1;
         marker.type = visualization_msgs::msg::Marker::SPHERE_LIST;
 

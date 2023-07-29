@@ -32,7 +32,7 @@ def generate_launch_description():
 
     # ros2 launch create3_controller create3_apriltag.launch.py
     create3_apriltag = IncludeLaunchDescription(PythonLaunchDescriptionSource([PathJoinSubstitution(
-        [current_pkg_dir, 'launch', 'create3_apriltag.launch.py'])]))
+        [current_pkg_dir, 'launch', 'airlab_cameras.launch.py'])]))
 
     # create3_joystick = IncludeLaunchDescription(PythonLaunchDescriptionSource([PathJoinSubstitution(
     #     [current_pkg_dir, 'launch', 'create3_joystick.py'])]))
@@ -43,37 +43,79 @@ def generate_launch_description():
     # --ros-args -p control:="/home/roboticslab/colcon_ws/src/create3_controller/config/dwa_param.yaml" -p sensor:=fusion
 
 
+    # create3_dwa_controller = Node(
+    #     package='create3_controller',
+    #     executable='dwa_controller',
+    #     namespace=namespace,
+    #     name='create3_dwa_controller',
+    #     # arguments=['--ros-args',
+    #     #            '-p',
+    #     #            'sensor:=fusion',
+    #     #            '-p',
+    #     #            'control:=/home/roboticslab/colcon_ws/src/create3_controller/config/dwa_param.yaml'
+    #     #            ],
+    #     parameters=[
+    #         {'sensor' : 'fusion',
+    #          'control' : os.path.join(current_pkg_dir, 'config/dwa_param.yaml'),
+    #          'robotTag': TAG_MAP.get(getRobotName(), 'tag36h11:7'),
+    #          'logOutput' : "/var/tmp"
+    #          }
+    #     ],
+    #     output='screen',
+    #       # disable this line if not using rviz to send goal
+    #     # remappings=[
+    #     #     ('/%s/goal_pose'%namespace, '/goal_pose')
+    #     # ]
+    # )
+
+    robotName = 'ac32'
+    if len(sys.argv) > 4:
+        robotName = sys.argv[4].split("=")[-1]
+
+    # --ros-args -p control:="/home/roboticslab/colcon_ws/src/create3_controller/config/dwa_param.yaml" -p sensor:=fusion
+    print(namespace, TAG_MAP.get(robotName))
+    # ac31 autonomous create3 robot 1
     create3_dwa_controller = Node(
         package='create3_controller',
         executable='dwa_controller',
         namespace=namespace,
-        name='create3_dwa_controller',
-        # arguments=['--ros-args',
-        #            '-p',
-        #            'sensor:=fusion',
-        #            '-p',
-        #            'control:=/home/roboticslab/colcon_ws/src/create3_controller/config/dwa_param.yaml'
-        #            ],
+        name='create3_simple_controller',
         parameters=[
-            {'sensor' : 'fusion',
+            {'sensor' : 'apriltag',
              'control' : os.path.join(current_pkg_dir, 'config/dwa_param.yaml'),
-             'robotTag': TAG_MAP.get(getRobotName(), 'tag36h11:7'),
-             'logOutput' : "/var/tmp"
+             'robotTag': TAG_MAP.get(robotName, 'tag36h11:32'),
+             'logOutput' : "/home/roboticslab/colcon_ws/src/create3_controller/launch/build"
              }
         ],
-        output='screen',
-          # disable this line if not using rviz to send goal 
-        # remappings=[
-        #     ('/%s/goal_pose'%namespace, '/goal_pose')
-        # ]
+    output='screen',
     )
 
     create3_rviz = Node(
         package='rviz2',
         executable='rviz2',
         name='create3_rviz2',
-        arguments=['-d', os.path.join(current_pkg_dir, 'config/create3_state.rviz')],
+        arguments=['-d', os.path.join(current_pkg_dir, 'config/multicam.rviz')],
         output='screen',
+    )
+
+    # ros2 run create3_controller waypoint_action_server
+    create3_waypoint_controller = Node(
+        package='create3_controller',
+        executable='waypoint_action_server',
+        namespace=namespace,
+        name='create3_waypoint_action_server',
+        parameters=[
+            {'robotTopic' : 'ekf/odom' }
+        ],
+        output='screen'
+    )
+
+    #create3 map server
+    create3_map_server = Node(
+        package='create3_controller',
+        executable='dynamic_map_server',
+        name='create3_map_server',
+        output='screen'
     )
 
     ld = LaunchDescription(ARGUMENTS)
@@ -82,5 +124,8 @@ def generate_launch_description():
     ld.add_action(create3_joystick)
     ld.add_action(create3_dwa_controller)
     ld.add_action(create3_rviz)
+    ld.add_action(create3_waypoint_controller)
+    ld.add_action(create3_map_server)
+
     return ld
 

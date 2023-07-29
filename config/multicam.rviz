@@ -61,7 +61,7 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        /ac31: true
+        /ac32: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -81,7 +81,7 @@ Visualization Manager:
           Value: true
         nexigo_cam:
           Value: true
-        tag36h11:7:
+        tag36h11:32:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -91,7 +91,7 @@ Visualization Manager:
       Tree:
         nexigo_cam:
           logitec_cam:
-            tag36h11:7:
+            tag36h11:32:
               {}
           map:
             {}
@@ -115,14 +115,14 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        {}
+        /ac32: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /ac31/dwa_create3
+        Value: /setpoint
       Value: true
     - Alpha: 0.699999988079071
       Class: rviz_default_plugins/Map

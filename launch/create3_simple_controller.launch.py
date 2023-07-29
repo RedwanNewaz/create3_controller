@@ -59,11 +59,6 @@ def generate_launch_description():
              'logOutput' : "/home/roboticslab/colcon_ws/src/create3_controller/launch/build"
              }
         ],
-        # disable this line if not using rviz to send goal 
-        # remappings=[
-        #     ('/%s/goal_pose'%namespace, '/goal_pose'),
-        #     # ('/odom', '/%s/odom'%namespace),
-        # ],
         output='screen',
     )
 
