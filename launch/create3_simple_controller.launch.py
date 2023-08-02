@@ -55,7 +55,7 @@ def generate_launch_description():
         parameters=[params_path]
     )
 
-    state_topic = "%s/apriltag/state" % robotName
+    state_topic = "/%s/apriltag/state" % robotName
 
 
 
@@ -78,7 +78,7 @@ def generate_launch_description():
         remappings=[
             # This maps the '/ekf/fusion' state topic for simplicity of demonstration.
             # In practice, this will have to be the rectified 'rect' images.
-            ("%s/ekf/fusion" % robotName, state_topic)
+            ("/%s/ekf/fusion" % robotName, state_topic)
         ],
         output='screen',
     )

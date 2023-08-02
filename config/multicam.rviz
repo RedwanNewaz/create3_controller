@@ -16,6 +16,7 @@ Panels:
         - /Map1
         - /Map1/Topic1
         - /Image2
+        - /Marker3
       Splitter Ratio: 0.5
     Tree Height: 172
   - Class: rviz_common/Selection
@@ -91,10 +92,9 @@ Visualization Manager:
       Tree:
         nexigo_cam:
           logitec_cam:
-            {}
+            tag36h11:7:
+              {}
           map:
-            {}
-          tag36h11:7:
             {}
       Update Interval: 0
       Value: true
@@ -110,7 +110,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: logitec/image_raw
+        Value: nexigo/image_raw
       Value: true
     - Class: rviz_default_plugins/Marker
       Enabled: true
@@ -158,7 +158,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /nexigo/image_raw
+        Value: /logitec/image_raw
       Value: true
     - Class: rviz_default_plugins/Axes
       Enabled: true
@@ -166,6 +166,19 @@ Visualization Manager:
       Name: Axes
       Radius: 0.10000000149011612
       Reference Frame: <Fixed Frame>
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Marker
+      Namespaces:
+        {}
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /setpoint
       Value: true
   Enabled: true
   Global Options:
@@ -222,7 +235,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 123.835693359375
+      Scale: 84.39055633544922
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz_default_plugins)
       X: -0.00586333591490984
