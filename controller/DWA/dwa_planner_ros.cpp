@@ -11,7 +11,7 @@ dwa_planner_ros::dwa_planner_ros(StatePtr stateEstimator):manager("DWA", stateEs
     this->declare_parameter("control", "dwa_param.yaml");
 
     // create subscribers
-    obs_sub_ = this->create_subscription<geometry_msgs::msg::PoseArray>("obstacles", 10, [&](const geometry_msgs::msg::PoseArray::SharedPtr msg)
+    obs_sub_ = this->create_subscription<geometry_msgs::msg::PoseArray>("/obstacles", 10, [&](const geometry_msgs::msg::PoseArray::SharedPtr msg)
     {return obstacle_callback(msg);});
     rviz_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>("goal_pose", 10, std::bind(
             &dwa_planner_ros::set_goal_callback, this, std::placeholders::_1)
@@ -19,7 +19,7 @@ dwa_planner_ros::dwa_planner_ros(StatePtr stateEstimator):manager("DWA", stateEs
 
     // create publishers
     traj_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("short_traj", 10);
-    obs_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("obstacles", 10);
+    obs_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("/obstacles", 10);
 
     // initialize internal parameters
     std::string param_file = this->get_parameter("control").get_parameter_value().get<std::string>();
@@ -32,6 +32,7 @@ dwa_planner_ros::dwa_planner_ros(StatePtr stateEstimator):manager("DWA", stateEs
     {return parameters_->get_param<double>(param);};
     config_.update_param(f);
     parameters_->get_obstacles(obstacles_);
+    timer_ = this->create_wall_timer(1s, [this] { publish_obstacles();});
 }
 
 
@@ -50,8 +51,8 @@ void dwa_planner_ros::execute(const tf2::Transform &current_pose) {
     auto curr_position = current_pose.getOrigin();
     tf2::Vector3 position_diff = goal_position - curr_position;
 
-    auto goal_heading = atan2(position_diff.y(), position_diff.x());
-    auto alpha = atan2(goal_position.y(), goal_position.x());
+//    auto goal_heading = atan2(position_diff.y(), position_diff.x());
+    auto alpha = atan2(position_diff.y(), position_diff.x());
 
 
 //    double current_angle = tf2::getYaw(current_pose.getRotation());
@@ -90,6 +91,14 @@ void dwa_planner_ros::execute(const tf2::Transform &current_pose) {
 //    if(alpha > M_PI_2 || alpha < -M_PI_2)
 //        control_[0] = -control_[0];
 
+    alpha = alpha  - current_angle  + M_PI;
+    alpha = fmod(alpha, 2 * M_PI) - M_PI;
+
+    if (alpha > M_PI_2 || alpha < - M_PI_2)
+    {
+        control_[0] = 0;
+    }
+
     publish_cmd(control_[0], control_[1]);
 
 
@@ -104,7 +113,7 @@ void dwa_planner_ros::set_goal_callback(geometry_msgs::msg::PoseStamped::SharedP
     initialized_ = true;
     // start autonomous navigation
     controlMode_ = AUTO_NAV;
-    publish_obstacles();
+
 }
 
 

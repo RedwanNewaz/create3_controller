@@ -46,6 +46,7 @@ namespace controller
         Obstacle obstacles_;
         tf2::Transform goal_pose_;
         std::once_flag obs_flag_;
+        rclcpp::TimerBase::SharedPtr timer_;
     };
 
 }
