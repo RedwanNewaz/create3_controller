@@ -17,6 +17,19 @@ TAG_MAP = {
     'ac32' : 'tag36h11:32'
 }
 
+conf_sensor_fusion = {
+    "tag_id": 7,
+    "tag_size": 0.2,
+    'logitec_pmat': [933.4418334960938, 0.0, 978.0901233670083, 0.0, 0.0, 995.1202392578125, 490.9420947208673, 0.0, 0.0, 0.0, 1.0, 0.0],
+    'nexigo_pmat': [863.1061401367188, 0.0, 946.3947846149531, 0.0, 0.0, 903.219482421875, 411.1189551965581, 0.0, 0.0, 0.0, 1.0, 0.0],
+    'logitec_to_map': [-0.232, 1.258, 3.098, 0.996, -0.013, -0.026, 0.073],
+    'nexigo_to_map': [0.259, 1.737, 3.070, -0.014, 0.970, 0.226, 0.080],
+    'ctrv_mtx': [0.005,  0.0, 0.0, 0.005],
+    'lidar_mtx': [0.0225, 0.0, 0.0, 0.0225],
+    'radar_mtx': [2.050,  0.000,  0.00, 0.000,  2.050,  0.00, 0.000,  0.000,  0.09],
+    'sensor_fusion': 1
+}
+
 def generate_launch_description():
     current_pkg_dir = get_package_share_directory("create3_controller")
     sensor_fusion_dir = get_package_share_directory("sensor_fusion")
@@ -48,11 +61,13 @@ def generate_launch_description():
         '{}_params.yaml'.format(robotName)
     )
 
+    conf_sensor_fusion['tag_id'] = 32 if robotName == 'ac32' else 7
+
     create3_state_node = Node(
         package='sensor_fusion', executable='sensor_fusion_node', output='screen',
         name="sensor_fusion_node",
         namespace=namespace,
-        parameters=[params_path]
+        parameters=[conf_sensor_fusion]
     )
 
     state_topic = "/%s/apriltag/state" % robotName
