@@ -286,12 +286,52 @@ void MainWindow::stopProc() {
 
 void MainWindow::monitorJoystick(const QStringList& robots) {
     QStringList joyCmds;
-    joyCmds  << "ros2" << "run" << "create3_controller" << "joystick_controller" << "--ns";
+    joyCmds   << "run" << "create3_controller" << "joystick_controller" << "--ns";
     for(const auto& robot: robots)
     {
         if(!robot.isEmpty())
             joyCmds << robot;
     }
 
-    startProc(joyCmds, "joy_manager", LAUNCH);
+    //startProc(joyCmds, "joy_manager", CLI);
+    process_joy = new QProcess;
+    this->connect(process_joy, SIGNAL(readyReadStandardOutput()), this, SLOT(readJoystickOutput()));
+    process_joy->start("ros2", joyCmds);
+}
+
+void MainWindow::readJoystickOutput() {
+
+    auto foundMatch = [&](const QString& text)
+    {
+        QRegularExpression regex("\\(([^)]*)\\)");
+
+        QStringList robotNames = settings->value("robotNames", QStringList()).toStringList();
+
+        QRegularExpressionMatchIterator it = regex.globalMatch(text);
+        while (it.hasNext()) {
+            QRegularExpressionMatch match = it.next();
+            QString captured = match.captured(1); // Capturing group 1 contains the string within parentheses
+
+            int index = robotNames.indexOf(captured);
+
+            qDebug() << "Found:" << captured << " " << index;
+            if(index != -1)
+            {
+                QModelIndex indx = model->index(index, 0);
+                ui->listView->selectionModel()->clearSelection();
+                ui->listView->selectionModel()->select(indx, QItemSelectionModel::Select);
+                ui->comboBox->setCurrentIndex(index);
+            }
+        }
+    };
+
+    QString output = QString::fromLocal8Bit(process_joy->readAllStandardOutput());
+    QStringList lines = output.split("\\r\\n");
+    lines.removeAll(QString(""));
+    QStringListIterator it(lines);
+    while(it.hasNext()){
+        QString view = it.next();
+        if (!view.isEmpty())
+            foundMatch(view);
+    }
 }

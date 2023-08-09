@@ -62,11 +62,11 @@ namespace controller{
                 //RCLCPP_INFO(get_logger(), "index = (%d)", index);
 
                 switch (index) {
-                    case 0: RCLCPP_INFO(get_logger(), "button = (X)"); break;
-                    case 1: RCLCPP_INFO(get_logger(), "button = (A)"); break;
-                    case 2: RCLCPP_INFO(get_logger(), "button = (B)"); break;
-                    case 3: RCLCPP_INFO(get_logger(), "button = (Y)"); break;
-                    case 4: robotIndex_ = (robotIndex_ + 1) % ns_.size(); RCLCPP_INFO(get_logger(), "robot = (%s)", ns_[robotIndex_].c_str()); break;
+                    case 0: std::cout << "button = (X)" << std::endl; break;
+                    case 1: std::cout << "button = (A)" << std::endl; break;
+                    case 2: std::cout << "button = (B)" << std::endl; break;
+                    case 3: std::cout << "button = (Y)" << std::endl; break;
+                    case 4: robotIndex_ = (robotIndex_ + 1) % ns_.size(); std::cout << "robot = (" << ns_[robotIndex_] << ")" << std::endl; break;
                 }
             }
 

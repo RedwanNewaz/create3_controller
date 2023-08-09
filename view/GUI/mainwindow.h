@@ -49,6 +49,8 @@ private slots:
 
     void on_actionmap_triggered();
 
+    void readJoystickOutput();
+
 
 
 private:
