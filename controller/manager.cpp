@@ -5,8 +5,8 @@
 #include "manager.h"
 using namespace controller;
 
-manager::manager(const rclcpp::NodeOptions& options):
-Node("create3_controller")
+manager::manager(const std::string& nodeName, const rclcpp::NodeOptions& options):
+Node(nodeName)
 {
     this->declare_parameter("safetyOverlook", true);
     cmd_vel_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel",1);

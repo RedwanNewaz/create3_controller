@@ -15,7 +15,7 @@ namespace controller
         UnicycleController(const rclcpp::NodeOptions& options);
         virtual ~UnicycleController();
         static tf2::Transform poseToTransform(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
-
+        rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface() const;
     private:
         void set_goal_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
         bool initialized_;

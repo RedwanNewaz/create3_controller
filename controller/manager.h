@@ -23,7 +23,7 @@ namespace controller
         using Clock = std::chrono::system_clock;
 
 
-        manager(const rclcpp::NodeOptions& options);
+        manager(const std::string& nodeName, const rclcpp::NodeOptions& options);
         void overrideSafety(bool status);
 
 

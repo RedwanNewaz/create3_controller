@@ -6,7 +6,7 @@
 
 using namespace controller;
 
-dwa_planner_ros::dwa_planner_ros(const rclcpp::NodeOptions& options):manager(options) {
+dwa_planner_ros::dwa_planner_ros(const rclcpp::NodeOptions& options):manager("dwa_planner_ros", options) {
     initialized_ = false;
     this->declare_parameter("control", "dwa_param.yaml");
 

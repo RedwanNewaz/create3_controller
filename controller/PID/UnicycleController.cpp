@@ -6,7 +6,7 @@
 namespace controller
 {
     UnicycleController::UnicycleController(const rclcpp::NodeOptions& options)
-            : manager(options) {
+            : manager("UnicycleController", options) {
         initialized_ = false;
         goal_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>("goal_pose", 10, std::bind(
                 &UnicycleController::set_goal_callback, this, std::placeholders::_1)
@@ -100,6 +100,10 @@ namespace controller
 
         publish_cmd(cmd_v, cmd_w);
 
+    }
+
+    rclcpp::node_interfaces::NodeBaseInterface::SharedPtr UnicycleController::get_node_base_interface() const {
+        return this->get_node_base_interface();
     }
 
 }
