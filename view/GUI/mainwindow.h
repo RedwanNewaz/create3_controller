@@ -49,6 +49,8 @@ private slots:
 
     void on_actionmap_triggered();
 
+
+
 private:
     Ui::MainWindow *ui;
     QStringListModel *model;
@@ -59,12 +61,15 @@ private:
     QSettings *settings;
     QThread *thread;
     ProcessManager *proc;
+    QProcess *process_joy;
 
 
 private:
 
     void startProc(const QStringList& cmd, const QString& name, const PMODE& mode);
     void stopProc();
+
+    void monitorJoystick(const QStringList& robots);
 
 
 

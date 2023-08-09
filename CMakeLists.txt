@@ -83,6 +83,14 @@ target_link_libraries(create3_view ${visualization_msgs_LIBRARIES})
 add_executable(create3_state_estimator src/state_estimator_node.cpp)
 target_link_libraries(create3_state_estimator create3_model create3_view )
 
+# build joystick controller
+find_package(Boost REQUIRED COMPONENTS program_options)
+find_package(sensor_msgs REQUIRED)
+add_executable(joystick_controller src/joystick_node.cpp
+		${PROJECT_SOURCE_DIR}/controller/JOY/joystick.h
+)
+target_link_libraries(joystick_controller create3_model create3_view Boost::program_options ${sensor_msgs_LIBRARIES})
+
 
 # build simple controller
 add_executable(simple_controller src/simple_controller_node.cpp
@@ -223,6 +231,13 @@ target_include_directories(create3_state_estimator PUBLIC
 		$<INSTALL_INTERFACE:include>)
 target_compile_features(create3_state_estimator PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 install(TARGETS create3_state_estimator DESTINATION lib/${PROJECT_NAME})
+
+
+target_include_directories(joystick_controller PUBLIC
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+		$<INSTALL_INTERFACE:include>)
+target_compile_features(joystick_controller PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+install(TARGETS joystick_controller DESTINATION lib/${PROJECT_NAME})
 
 target_include_directories(dwa_controller PUBLIC
 		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>

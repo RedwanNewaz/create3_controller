@@ -40,8 +40,13 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("create3_controller_gui");
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
 
+    // start joy manager
+    monitorJoystick(robotNames);
+
     // set process flag false
     isStarted = false;
+
+
 }
 
 MainWindow::~MainWindow()
@@ -63,6 +68,7 @@ MainWindow::~MainWindow()
 
     delete settings;
     delete model;
+    delete process_joy;
     delete ui;
 
 }
@@ -129,18 +135,18 @@ void MainWindow::on_startButton_clicked()
         //start process
         startProc(cmd.split(" "), "START_BUTTON", LAUNCH);
         // change options
-        ui->dockButton->setDisabled(true);
-        ui->undockButton->setDisabled(true);
-        ui->widget->setDisabled(true);
+//        ui->dockButton->setDisabled(true);
+//        ui->undockButton->setDisabled(true);
+//        ui->widget->setDisabled(true);
         ui->startButton->setText("STOP");
     }
     else
     {
         stopProc();
         //change option
-        ui->dockButton->setDisabled(false);
-        ui->undockButton->setDisabled(false);
-        ui->widget->setDisabled(false);
+//        ui->dockButton->setDisabled(false);
+//        ui->undockButton->setDisabled(false);
+//        ui->widget->setDisabled(false);
         ui->startButton->setText("Start");
 
     }
@@ -276,4 +282,16 @@ void MainWindow::stopProc() {
         delete proc;
         delete thread;
     }
+}
+
+void MainWindow::monitorJoystick(const QStringList& robots) {
+    QStringList joyCmds;
+    joyCmds  << "ros2" << "run" << "create3_controller" << "joystick_controller" << "--ns";
+    for(const auto& robot: robots)
+    {
+        if(!robot.isEmpty())
+            joyCmds << robot;
+    }
+
+    startProc(joyCmds, "joy_manager", LAUNCH);
 }

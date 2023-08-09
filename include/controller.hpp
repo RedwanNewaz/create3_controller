@@ -8,4 +8,5 @@
 #include "../controller/PID/UnicycleController.h"
 #include "../controller/DWA/dwa_planner.h"
 #include "../controller/DWA/dwa_planner_ros.h"
+#include "../controller/JOY/joystick.h"
 #endif //CREATE3_CONTROLLER_CONTROLLER_H
