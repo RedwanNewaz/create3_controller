@@ -9,10 +9,17 @@ using namespace controller;
 dwa_planner_ros::dwa_planner_ros(StatePtr stateEstimator):manager("DWA", stateEstimator) {
     initialized_ = false;
     this->declare_parameter("control", "dwa_param.yaml");
+    this->declare_parameter("obstacles", "ac32");
 
+    std::string obsTopic = this->get_parameter("obstacles").get_parameter_value().get<std::string>();
+    obsTopic = "/" + obsTopic + "/ekf/odom";
     // create subscribers
-    obs_sub_ = this->create_subscription<geometry_msgs::msg::PoseArray>("/obstacles", 10, [&](const geometry_msgs::msg::PoseArray::SharedPtr msg)
-    {return obstacle_callback(msg);});
+    obs_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(obsTopic, 10, [&](nav_msgs::msg::Odometry::SharedPtr msg)
+    {
+        obstacles_.clear();
+        std::array<double, 2> obs{msg->pose.pose.position.x, msg->pose.pose.position.y};
+        obstacles_.emplace_back(obs);
+    });
     rviz_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>("goal_pose", 10, std::bind(
             &dwa_planner_ros::set_goal_callback, this, std::placeholders::_1)
     );

@@ -39,7 +39,7 @@ namespace controller
         ParamPtr2 parameters_;
         bool initialized_;
         rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr traj_pub_, obs_pub_;
-        rclcpp::Subscription<geometry_msgs::msg::PoseArray>::SharedPtr obs_sub_;
+        rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr obs_sub_;
         rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr rviz_sub_;
         DynamicWindow::Config config_;
         Control control_;

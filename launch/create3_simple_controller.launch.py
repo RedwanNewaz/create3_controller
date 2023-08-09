@@ -39,7 +39,7 @@ def generate_launch_description():
     create3_joystick = IncludeLaunchDescription(PythonLaunchDescriptionSource([PathJoinSubstitution(
         [current_pkg_dir, 'launch', 'create3_joystick.py'])]),
         launch_arguments={'namespace': namespace}.items()
-        )
+    )
 
     robotName = 'ac32'
     if len(sys.argv) > 4:
