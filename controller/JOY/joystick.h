@@ -5,6 +5,7 @@
 #ifndef CREATE3_CONTROLLER_JOYSTICK_H
 #define CREATE3_CONTROLLER_JOYSTICK_H
 #include <vector>
+#include <mutex>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joy.hpp>
 #include <geometry_msgs/msg/twist.hpp>
@@ -22,7 +23,9 @@ namespace controller{
 
             joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>("joy", 10, [&](sensor_msgs::msg::Joy::SharedPtr msg)
             {
+                mu_.lock();
                 decode_joy_msg(msg);
+                mu_.unlock();
             });
 
 
@@ -37,7 +40,9 @@ namespace controller{
 
             cmd_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, [&](geometry_msgs::msg::Twist::SharedPtr msg)
             {
+                mu_.lock();
                 cmd_pubs_[robotIndex_]->publish(*msg);
+                mu_.unlock();
             });
 
 
@@ -83,6 +88,11 @@ namespace controller{
         int robotIndex_;
         rclcpp::Time prev_;
         std::vector<std::string> ns_;
+        static std::mutex mu_;
     };
 }
+
+
+std::mutex controller::joystick::mu_;
+
 #endif //CREATE3_CONTROLLER_JOYSTICK_H

@@ -89,7 +89,9 @@ find_package(sensor_msgs REQUIRED)
 add_executable(joystick_controller src/joystick_node.cpp
 		${PROJECT_SOURCE_DIR}/controller/JOY/joystick.h
 )
-target_link_libraries(joystick_controller create3_model create3_view Boost::program_options ${sensor_msgs_LIBRARIES})
+target_link_libraries(joystick_controller create3_model create3_view Boost::program_options
+		pthread
+		${sensor_msgs_LIBRARIES})
 
 
 # build simple controller

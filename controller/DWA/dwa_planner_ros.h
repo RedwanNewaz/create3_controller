@@ -47,9 +47,11 @@ namespace controller
         tf2::Transform goal_pose_;
         std::once_flag obs_flag_;
         rclcpp::TimerBase::SharedPtr timer_;
+        static std::mutex mu_;
     };
 
 }
+
 
 
 #endif //CREATE3_CONTROLLER_DWA_PLANNER_ROS_H

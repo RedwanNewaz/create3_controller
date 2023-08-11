@@ -133,7 +133,7 @@ namespace model
                     break;
             }
 
-            RCLCPP_INFO(get_logger(), "state = %d", state);
+            // RCLCPP_INFO(get_logger(), "state = %d", state);
 
 
 
@@ -143,7 +143,7 @@ namespace model
         {
             if(ir_values_.empty())
                 return 0;
-            return *std::max_element(ir_values_.begin(), ir_values_.end());
+            return std::abs(*std::max_element(ir_values_.begin(), ir_values_.end()));
         }
         void intensity_callback(irobot_create_msgs::msg::IrIntensityVector::SharedPtr msg)
         {

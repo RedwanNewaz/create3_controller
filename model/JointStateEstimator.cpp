@@ -125,7 +125,7 @@ void JointStateEstimator::lookupTransform(const Pose& pose)
     fusedData_->apriltag = transform;
     fusedData_->updateStatus[APRILTAG] = true;
     auto p = pose.getPoint();
-    RCLCPP_INFO(get_logger(), "[apriltag] =  (%03lf, %03lf)", p.x, p.y);
+//    RCLCPP_INFO(get_logger(), "[apriltag] =  (%03lf, %03lf)", p.x, p.y);
     // generate consensus using sensor fusion algorithm
     // check if all sensors are updated or not: there is no false in the array
     if(!std::count(fusedData_->updateStatus.begin(), fusedData_->updateStatus.end(), false))

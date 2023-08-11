@@ -14,6 +14,7 @@ int main(int argc, char ** argv)
 
     rclcpp::executors::MultiThreadedExecutor executor;
     auto node1 = std::make_shared<controller::dwa_planner_ros>(stateEstimator);
+    node1->overrideSafety(true);
 
     executor.add_node(node1);
     executor.add_node(stateEstimator);

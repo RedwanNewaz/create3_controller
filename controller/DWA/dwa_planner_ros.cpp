@@ -50,7 +50,7 @@ void dwa_planner_ros::execute(const tf2::Transform &current_pose) {
     // don't execute until a goal location is given
     if(!initialized_)
         return;
-
+    mu_.lock();
     // compute state difference
     auto goal_position = goal_pose_.getOrigin();
 
@@ -77,7 +77,8 @@ void dwa_planner_ros::execute(const tf2::Transform &current_pose) {
     goal[1] = goal_position.y();
 
     // don't move if you reach to a goal region
-    if (remainDist < config_.goal_radius)
+    const double goal_radius = 0.3; // m
+    if (remainDist < goal_radius)
     {
         if(initialized_)
             RCLCPP_INFO(get_logger(), "[dwa_controller] goal reached :-)");
@@ -103,11 +104,12 @@ void dwa_planner_ros::execute(const tf2::Transform &current_pose) {
 
     if (alpha > M_PI_2 || alpha < - M_PI_2)
     {
-        control_[0] = 0;
+        control_[0] *= 0;
+        control_[1] = -0.2;
     }
 
     publish_cmd(control_[0], control_[1]);
-
+    mu_.unlock();
 
 }
 
@@ -178,5 +180,9 @@ tf2::Transform dwa_planner_ros::poseToTransform(const geometry_msgs::msg::PoseSt
 
     pose.setOrigin(tf2::Vector3(x, y, z));
     pose.setRotation(q);
+
+    RCLCPP_INFO(get_logger(), "goal received (%lf, %lf)", x, y);
     return pose;
 }
+
+std::mutex  controller::dwa_planner_ros::mu_;
