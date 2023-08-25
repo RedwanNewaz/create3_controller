@@ -83,11 +83,18 @@ def generate_launch_description():
     )
 
     #create3 map server
+    map_parm = {
+        'mapResolution': 0.0052,
+        'mapOffsetX': 0.0,
+        'mapOffsetY': 0.55 
+
+    }
     create3_map_server = Node(
         package='create3_controller',
         executable='dynamic_map_server',
         name='create3_map_server',
-        output='screen'
+        output='screen',
+        parameters=[map_parm]
     )
 
     ld = LaunchDescription(ARGUMENTS)

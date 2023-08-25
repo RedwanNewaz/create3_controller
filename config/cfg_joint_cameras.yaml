@@ -1,0 +1,27 @@
+nexigo_cam:
+  camera_name: nexigo_cam
+  camera_info_url: "file://{}/config/head_camera_nexigo_1920.yaml"
+  framerate: 30.0
+  frame_id: nexigo_cam
+  image_height: 1080
+  image_width: 1920
+  io_method: mmap
+  pixel_format: mjpeg
+  video_device: /dev/video0
+  tf:
+    map: [0.158, 1.704, 2.598, 0.663, 0.738, -0.016, 0.121]
+    logitec: [1.500, 4.911, 0.087, -0.239, -0.204, 0.948, 0.053]
+
+logitec_cam:
+  camera_name: logitec_cam
+  camera_info_url: "file://{}/config/head_camera_logitec_1920.yaml"
+  framerate: 30.0
+  frame_id: logitec_cam
+  image_height: 1080
+  image_width: 1920
+  io_method: mmap
+  pixel_format: mjpeg
+  video_device: /dev/video2
+  tf:
+    map: [-0.538, 1.894, 3.810, 0.760, -0.561, -0.075, -0.318]
+    nexigo: [0.383, 4.517, 2.414, -0.239, -0.204, 0.948, -0.053]

@@ -91,9 +91,10 @@ Visualization Manager:
       Tree:
         nexigo_cam:
           logitec_cam:
-            tag36h11:7:
-              {}
+            {}
           map:
+            {}
+          tag36h11:7:
             {}
       Update Interval: 0
       Value: true
@@ -115,7 +116,7 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        {}
+        /ac31: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -211,7 +212,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 0.005001922138035297
+      Angle: -0.00500286091119051
       Class: rviz_default_plugins/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -221,11 +222,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 123.835693359375
+      Scale: 87.9888916015625
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz_default_plugins)
-      X: -0.00586333591490984
-      Y: -1.0137778520584106
+      X: -0.7593550682067871
+      Y: -0.5168787837028503
     Saved: ~
 Window Geometry:
   Displays:
@@ -246,4 +247,4 @@ Window Geometry:
     collapsed: true
   Width: 1848
   X: 3192
-  Y: 364
+  Y: 372

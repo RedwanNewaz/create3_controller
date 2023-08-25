@@ -1,4 +1,4 @@
-image: "map_test2.png"
+image: "map_airlab.png"
 resolution: 0.0052
 origin: [-0.45, 0.1, 0.0]
 occupied_thresh: 1.0
