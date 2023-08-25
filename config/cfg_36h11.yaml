@@ -11,5 +11,5 @@ detector:
     blur: 0.0           # sigma of Gaussian blur for quad detection
     refine: true        # snap to strong gradients
     sharpening: 0.25    # sharpening of decoded images
-    debug: true        # write additional debugging images to current working directory
+    debug: false        # write additional debugging images to current working directory
 
