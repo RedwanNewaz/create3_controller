@@ -216,6 +216,6 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--frame-id", type=str, default="tag36h11:7", choices=['tag36h11:7', 'tag36h11:32'])
+    parser.add_argument("--frame-id", type=str, default="tag36h11:32", choices=['tag36h11:7', 'tag36h11:32'])
     args = parser.parse_args()
     main(args)

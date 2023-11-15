@@ -81,8 +81,30 @@ void EKF::ekf_estimation(const Eigen::Vector3f& z, const Eigen::Vector2f& u)
 
     Eigen::Matrix3f S = jH * PPred * jH.transpose() + R;
     Eigen::Matrix<float, 4, 3> K = PPred * jH.transpose() * S.inverse();
-    xEst = xPred + K * y;
-    PEst = (Eigen::Matrix4f::Identity() - K * jH) * PPred;
+
+    // check nan 
+    Eigen::Vector4f xxEst = xPred + K * y;
+    Eigen::Matrix4f PPEst = (Eigen::Matrix4f::Identity() - K * jH) * PPred;
+
+
+    auto hasMatrixNaN = [](const Eigen::MatrixXf& data)
+    {
+        for (int i = 0; i < data.rows(); ++i) {
+            for (int j = 0; j < data.cols(); ++j) {
+                if (std::isnan(data(i, j))) {
+                    std::cout << "NaN detected at position (" << i << ", " << j << ")\n";
+                    return true;
+                }
+            }
+        }
+        return false; 
+    };
+
+    // update matrices
+    if(!hasMatrixNaN(xxEst))
+        xEst = xxEst;
+    if(!hasMatrixNaN(PPEst)) 
+        PEst = PPEst; 
 }
 
 void EKF::update(const tf2::Transform &obs, const geometry_msgs::msg::Twist& cmd, tf2::Transform &res) {

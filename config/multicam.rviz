@@ -61,7 +61,7 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        /ac31: true
+        /ac32: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -81,7 +81,7 @@ Visualization Manager:
           Value: true
         nexigo_cam:
           Value: true
-        tag36h11:7:
+        tag36h11:32:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -94,7 +94,7 @@ Visualization Manager:
             {}
           map:
             {}
-          tag36h11:7:
+          tag36h11:32:
             {}
       Update Interval: 0
       Value: true
@@ -116,7 +116,7 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        /ac31: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -212,7 +212,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -0.00500286091119051
+      Angle: -3.1550095081329346
       Class: rviz_default_plugins/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -222,11 +222,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 87.9888916015625
+      Scale: 83.74906921386719
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz_default_plugins)
-      X: -0.7593550682067871
-      Y: -0.5168787837028503
+      X: -0.6015636920928955
+      Y: -0.2907971739768982
     Saved: ~
 Window Geometry:
   Displays:

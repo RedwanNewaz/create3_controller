@@ -1,0 +1,20 @@
+image_width: 1280
+image_height: 720
+camera_name: logitec_camera
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [987.8296325844916, 0, 637.8787968876694, 0, 989.978123758108, 358.6166165033878, 0, 0, 1]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [0.3091635349184898, -0.5783085825748047, -0.004807178083104218, 3.115574739676029e-05, 0]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1, 0, 0, 0, 1, 0, 0, 0, 1]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [1018.619201660156, 0, 637.1536808852034, 0, 0, 1028.277709960938, 355.9066227922158, 0, 0, 0, 1, 0]

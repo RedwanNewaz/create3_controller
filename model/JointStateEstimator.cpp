@@ -144,7 +144,15 @@ void JointStateEstimator::lookupTransform(const Pose& pose)
     raw_measurements_ << p.x, p.y;
     Lidar::Measurement measurement{pose.getTimestamp(), raw_measurements_};
 
+    auto prior_belief = fusion_->GetBelief();
     fusion_->ProcessMeasurement(measurement);
+    auto posterior_belief = fusion_->GetBelief();
+    const auto& sv{posterior_belief.mu()};
+    CTRV::ROStateVectorView state_vector_view{sv};
+    // state_vector_view.px(), state_vector_view.py()
+    if (std::isnan(state_vector_view.px()) || std::isnan(state_vector_view.py())) {
+        fusion_->SetBelief(prior_belief);
+    }
 
 
 
